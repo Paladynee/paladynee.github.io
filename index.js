@@ -26,36 +26,38 @@ let shopDetails = {
 
 let sprites = [];
 let playerSprites = [];
-function load1() {
-    let spritePaths = ["./sprites/player.png", "./sprites/sprite1.png", "./sprites/sprite2.png", "./sprites/sprite3.png", "./sprites/sprite4.png", "./sprites/sprite5.png", "./sprites/sprite6.png", "./sprites/sprite7.png", "./sprites/sprite8.png", "./sprites/sprite9.png", "./sprites/sprite10.png"];
+function loadSprites() {
+    //let spritePaths = ["./sprites/player.png", "./sprites/sprite1.png", "./sprites/sprite2.png", "./sprites/sprite3.png", "./sprites/sprite4.png", "./sprites/sprite5.png", "./sprites/sprite6.png", "./sprites/sprite7.png", "./sprites/sprite8.png", "./sprites/sprite9.png", "./sprites/sprite10.png"];
+    let spritePaths = ["./sprites/player.png"]
+
+    for (let i = 1; i < 11; i++) {
+        let element = "./sprites/sprite"
+        element = element.concat(i).concat(".png")
+        spritePaths.push(element)
+    }
 
     let loadedSprites = 0;
 
-    // Function to check if all sprites have been loaded
-    function checkAllSpritesLoaded() {
-        if (loadedSprites === spritePaths.length) {
-            load2();
-        }
-    }
-
     // Load each sprite image
     for (let i = 0; i < spritePaths.length; i++) {
+
         let sprite = new Image();
-        sprite.onload = function () {
+
+        sprite.onload = () => {
             loadedSprites++;
-            checkAllSpritesLoaded();
+            //check if all sprites have been loaded
+            if (loadedSprites === spritePaths.length) loadGame();
+            
         };
+
         sprite.src = spritePaths[i];
+
         if (spritePaths[i] === "./sprites/player.png") {
             playerSprites.push(sprite);
         } else {
             sprites.push(sprite);
         }
     }
-}
-
-function rand(domain) {
-    return Math.round(Math.random() * domain);
 }
 
 function handlePaperRemoval(type) {
@@ -72,30 +74,43 @@ function handlePaperRemoval(type) {
     }
 }
 
-function randFloor(domain) {
-    return Math.floor(Math.random() * domain);
+function random(domain) {
+    return Math.random() * domain
+}
+
+function roundRand(domain) {
+    return Math.round(random(domain));
+}
+
+function floorRand(domain) {
+    return Math.floor(random(domain));
 }
 
 function spawnPapers(amount, type, dev) {
+    
     if (!dev) {
         // check paper limit amount
-        let current = playfield.papers.length;
-        let freeSpace = player.paperLimit - current;
+        const currentPapers = playfield.papers.length;
+        const freeSpace = player.paperLimit - currentPapers;
+        
         if (freeSpace <= 0) return;
-        if (current + amount > player.paperLimit) {
-            amount = player.paperLimit - current;
+        if (currentPapers + amount > player.paperLimit) {
+            amount = freeSpace;
         }
     }
-    for (let i = 0; i < amount; i++)
-        playfield.papers.push({
-            pos: [30 + rand(1220), 30 + rand(660)],
-            type: type,
-            vel: [0, 0],
-            sprite: sprites[randFloor(sprites.length)],
-        });
+
+    const newPapers = {
+        pos: [30 + roundRand(1220), 30 + roundRand(660)],
+        type: type,
+        vel: [0, 0],
+        sprite: sprites[floorRand(sprites.length)],
+    }
+
+    for (let i = 0; i < amount; i++) playfield.papers.push(newPapers);
+    
 }
 
-function load2() {
+function loadGame() {
     /**
      * @type {HTMLCanvasElement}
      */
@@ -106,18 +121,28 @@ function load2() {
 
     let held = false;
 
-    function draw() {
-        // update the game
-        updateGame();
-        // clear screen
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        // draw papers
+    function drawPapers() {
         for (let paper of playfield.papers) {
             let pos = paper.pos;
             ctx.drawImage(paper.sprite, 0, 0, 16, 16, pos[0] - 8, pos[1] - 8, 32, 32);
         }
-        // draw circles
+    }
 
+    function drawCircles() {
+
+    }
+
+    function drawPlayer() {
+
+    }
+
+    function draw() {
+        updateGame();
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        drawPapers()
+
+        // draw circles
         for (let circle of playfield.circles) {
             let [x, y] = circle.pos;
             let time = (Date.now() - circle.start) / 1000 / circle.interval;
@@ -180,7 +205,7 @@ function load2() {
 
             if (dist <= repelRad) {
                 // Calculate repulsion force based on distance
-                let randomForceOffsetFactor = (rand(50) + 55) / 100;
+                let randomForceOffsetFactor = (roundRand(50) + 55) / 100;
                 let force = ((repelRad - dist) / repelRad) * repelFactor * randomForceOffsetFactor;
 
                 // Apply repulsion force in the direction away from the player
@@ -256,7 +281,7 @@ function load2() {
     });
 }
 
-window.addEventListener("load", load1);
+window.addEventListener("load", loadSprites);
 
 const windowDiv = document.querySelector(".floating-window");
 const topBar = windowDiv.querySelector(".top-bar");
