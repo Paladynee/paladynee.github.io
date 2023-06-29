@@ -162,8 +162,8 @@ function loadGame() {
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d");
 
-    canvas.width = width;
-    canvas.height = height;
+    canvas.width = 1280;
+    canvas.height = 720;
 
     let held = false;
 
