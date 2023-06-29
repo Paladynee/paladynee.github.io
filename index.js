@@ -167,7 +167,6 @@ function loadGame() {
 
     let held = false;
 
-    draw(canvas, ctx, updateGame);
 
     function updateGame() {
         let repelFactor = 1;
@@ -221,6 +220,8 @@ function loadGame() {
             return true;
         });
     }
+
+    draw(canvas, ctx, updateGame);
 
     window.addEventListener("keypress", (event) => {
         let key = event.key;
