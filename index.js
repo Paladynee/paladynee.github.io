@@ -47,7 +47,7 @@ function loadSprites() {
             loadedSprites++;
             //check if all sprites have been loaded
             if (loadedSprites === spritePaths.length) loadGame();
-            
+
         };
 
         sprite.src = spritePaths[i];
@@ -86,13 +86,13 @@ function floorRand(domain) {
     return Math.floor(random(domain));
 }
 
-function spawnPapers(amount, type, dev) {
-    
+function spawnPapers(amount, type, dev = false) {
+
     if (!dev) {
         // check paper limit amount
         const currentPapers = playfield.papers.length;
         const freeSpace = player.paperLimit - currentPapers;
-        
+
         if (freeSpace <= 0) return;
         if (currentPapers + amount > player.paperLimit) {
             amount = freeSpace;
@@ -107,42 +107,20 @@ function spawnPapers(amount, type, dev) {
     }
 
     for (let i = 0; i < amount; i++) playfield.papers.push(newPapers);
-    
+
 }
 
-function loadGame() {
-    /**
-     * @type {HTMLCanvasElement}
-     */
-    const canvas = document.getElementById("canvas");
-    const ctx = canvas.getContext("2d");
-    canvas.height = 720;
-    canvas.width = 1280;
+function draw(canvas, ctx, updateGame) {
 
-    let held = false;
-
-    function drawPapers() {
+    const drawPapers = () => {
         for (let paper of playfield.papers) {
             let pos = paper.pos;
             ctx.drawImage(paper.sprite, 0, 0, 16, 16, pos[0] - 8, pos[1] - 8, 32, 32);
         }
     }
 
-    function drawCircles() {
+    const drawCircles = () => {
 
-    }
-
-    function drawPlayer() {
-
-    }
-
-    function draw() {
-        updateGame();
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        drawPapers()
-
-        // draw circles
         for (let circle of playfield.circles) {
             let [x, y] = circle.pos;
             let time = (Date.now() - circle.start) / 1000 / circle.interval;
@@ -157,19 +135,39 @@ function loadGame() {
             ctx.arc(x, y, circle.radius, 0, 2 * Math.PI, true);
             ctx.stroke();
         }
-
-        // draw player
-        ctx.drawImage(playerSprites[0], 0, 0, 64, 64, player.pos[0] - 32, player.pos[1] - 32, 64, 64);
-        let display = document.getElementById("primaryDisplay");
-        display.innerHTML = "Money: " + player.moneys.paper;
-        requestAnimationFrame(draw);
     }
 
-    draw();
+    const drawPlayer = () => ctx.drawImage(playerSprites[0], 0, 0, 64, 64, player.pos[0] - 32, player.pos[1] - 32, 64, 64);
+    
 
-    function spawnCircle(timestamp, pos, radius, interval) {
-        playfield.circles.push({ start: timestamp, pos: pos, radius: radius, interval: interval });
-    }
+    // update logic
+    updateGame();
+    // clear old shit
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // redraw
+    drawPapers()
+    drawCircles()
+    drawPlayer()
+
+    let display = document.getElementById("primaryDisplay");
+    display.innerHTML = "Money: " + player.moneys.paper;
+    requestAnimationFrame(draw);
+}
+
+function loadGame() {
+    /**
+     * @type {HTMLCanvasElement}
+     */
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+
+    canvas.width = width;
+    canvas.height = height;
+
+    let held = false;
+
+    draw(canvas, ctx, updateGame);
 
     function updateGame() {
         let repelFactor = 1;
@@ -177,7 +175,8 @@ function loadGame() {
         let frictionFactor = 0.93;
         let frictionThreshold = 0.025;
         let roundingFactor = 10;
-        let frictionRoundingFactorFactor = 100;
+        //frictionRoundingFactorFactor
+        let frff = 100;
 
         // spawn continuous stream of papers while held
         if (held) {
@@ -196,12 +195,14 @@ function loadGame() {
             let dy = y - player.pos[1];
 
             let dist = Math.hypot(dx, dy);
-
-            paper.vel[0] = Math.floor(paper.vel[0] * roundingFactor * frictionFactor * frictionRoundingFactorFactor) / roundingFactor / frictionRoundingFactorFactor;
-            paper.vel[1] = Math.floor(paper.vel[1] * roundingFactor * frictionFactor * frictionRoundingFactorFactor) / roundingFactor / frictionRoundingFactorFactor;
-
-            paper.pos[0] = Math.round(paper.pos[0] * roundingFactor + paper.vel[0] * roundingFactor) / roundingFactor;
-            paper.pos[1] = Math.round(paper.pos[1] * roundingFactor + paper.vel[1] * roundingFactor) / roundingFactor;
+            const doVelMagik = (toBeMagikd) => Math.floor(toBeMagikd * roundingFactor * frictionFactor * frff) / roundingFactor / frff;
+            const doPosMagik = (toBeMagikd) => Math.round(toBeMagikd * roundingFactor + paper.vel[0] * roundingFactor) / roundingFactor;
+            
+            // magic math
+            paper.vel[0] = doVelMagik(paper.vel[0])
+            paper.vel[1] = doVelMagik(paper.vel[1])
+            paper.pos[0] = doPosMagik(paper.pos[0])
+            paper.pos[1] = doPosMagik(paper.pos[1])
 
             if (dist <= repelRad) {
                 // Calculate repulsion force based on distance
@@ -212,8 +213,9 @@ function loadGame() {
                 paper.vel[0] += (dx / dist) * force;
                 paper.vel[1] += (dy / dist) * force;
             } else {
-                if (Math.abs(paper.vel[0]) < frictionThreshold) paper.vel[0] = 0;
-                if (Math.abs(paper.vel[1]) < frictionThreshold) paper.vel[1] = 0;
+                const clamp = (wutIsBeingKlampd) => (Math.abs(wutIsBeingKlampd) < frictionThreshold) ? 0 : wutIsBeingKlampd
+                paper.vel[0] = clamp(paper.vel[0])
+                paper.vel[1] = clamp(paper.vel[1])
             }
 
             return true;
@@ -230,7 +232,12 @@ function loadGame() {
                 playfield.papers = [];
                 break;
             case "q":
-                spawnCircle(Date.now(), [640, 360], document.getElementById("circleRadiusInput").value, document.getElementById("circleIntervalInput").value);
+                playfield.circles.push({
+                    start: Date.now(),
+                    pos: [640, 360],
+                    radius: document.getElementById("circleRadiusInput").value,
+                    interval: document.getElementById("circleIntervalInput").value
+                });
                 break;
             default:
                 break;
@@ -245,6 +252,7 @@ function loadGame() {
         held = false;
     });
 
+    // interval ID
     let gameLoop = setInterval(loopFunc, 100);
 
     let counters = [
@@ -253,7 +261,7 @@ function loadGame() {
             every: 4,
             counter: 0,
             func: () => {
-                spawnPapers(10, 1, false);
+                spawnPapers(10, 1);
             },
         },
     ];
@@ -273,10 +281,13 @@ function loadGame() {
         const canvasLocation = canvas.getBoundingClientRect();
         let x = Math.floor(event.x - canvasLocation.x);
         let y = Math.floor(event.y - canvasLocation.y);
+
+        // borders
         if (x < 0) x = 0;
         if (x > 1280) x = 1280;
         if (y < 0) y = 0;
         if (y > 720) y = 720;
+
         player.pos = [x, y];
     });
 }
