@@ -26,36 +26,36 @@ let shopDetails = {
 
 let sprites = [];
 let playerSprites = [];
-function loadSprites() {
-    //let spritePaths = ["./sprites/player.png", "./sprites/sprite1.png", "./sprites/sprite2.png", "./sprites/sprite3.png", "./sprites/sprite4.png", "./sprites/sprite5.png", "./sprites/sprite6.png", "./sprites/sprite7.png", "./sprites/sprite8.png", "./sprites/sprite9.png", "./sprites/sprite10.png"];
-    let spritePaths = ["./sprites/player.png"];
-
-    for (let i = 1; i < 11; i++) {
-        let element = "./sprites/sprite";
-        element = element.concat(i).concat(".png");
-        spritePaths.push(element);
-    }
+function load1() {
+    let spritePaths = ["./sprites/player.png", "./sprites/sprite1.png", "./sprites/sprite2.png", "./sprites/sprite3.png", "./sprites/sprite4.png", "./sprites/sprite5.png", "./sprites/sprite6.png", "./sprites/sprite7.png", "./sprites/sprite8.png", "./sprites/sprite9.png", "./sprites/sprite10.png"];
 
     let loadedSprites = 0;
+
+    // Function to check if all sprites have been loaded
+    function checkAllSpritesLoaded() {
+        if (loadedSprites === spritePaths.length) {
+            load2();
+        }
+    }
 
     // Load each sprite image
     for (let i = 0; i < spritePaths.length; i++) {
         let sprite = new Image();
-
-        sprite.onload = () => {
+        sprite.onload = function () {
             loadedSprites++;
-            //check if all sprites have been loaded
-            if (loadedSprites === spritePaths.length) loadGame();
+            checkAllSpritesLoaded();
         };
-
         sprite.src = spritePaths[i];
-
         if (spritePaths[i] === "./sprites/player.png") {
             playerSprites.push(sprite);
         } else {
             sprites.push(sprite);
         }
     }
+}
+
+function rand(domain) {
+    return Math.round(Math.random() * domain);
 }
 
 function handlePaperRemoval(type) {
@@ -72,48 +72,52 @@ function handlePaperRemoval(type) {
     }
 }
 
-function random(domain) {
-    return Math.random() * domain;
+function randFloor(domain) {
+    return Math.floor(Math.random() * domain);
 }
 
-function roundRand(domain) {
-    return Math.round(random(domain));
-}
-
-function floorRand(domain) {
-    return Math.floor(random(domain));
-}
-
-function spawnPapers(amount, type, dev = false) {
+function spawnPapers(amount, type, dev) {
     if (!dev) {
         // check paper limit amount
-        const currentPapers = playfield.papers.length;
-        const freeSpace = player.paperLimit - currentPapers;
-
+        let current = playfield.papers.length;
+        let freeSpace = player.paperLimit - current;
         if (freeSpace <= 0) return;
-        if (currentPapers + amount > player.paperLimit) {
-            amount = freeSpace;
+        if (current + amount > player.paperLimit) {
+            amount = player.paperLimit - current;
         }
     }
-
     for (let i = 0; i < amount; i++)
         playfield.papers.push({
-            pos: [30 + roundRand(1220), 30 + roundRand(660)],
+            pos: [30 + rand(1220), 30 + rand(660)],
             type: type,
             vel: [0, 0],
-            sprite: sprites[floorRand(sprites.length)],
+            sprite: sprites[randFloor(sprites.length)],
         });
 }
 
-function draw(canvas, ctx, updateGame) {
-    const drawPapers = () => {
+function load2() {
+    /**
+     * @type {HTMLCanvasElement}
+     */
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    canvas.height = 720;
+    canvas.width = 1280;
+
+    let held = false;
+
+    function draw() {
+        // update the game
+        updateGame();
+        // clear screen
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // draw papers
         for (let paper of playfield.papers) {
             let pos = paper.pos;
             ctx.drawImage(paper.sprite, 0, 0, 16, 16, pos[0] - 8, pos[1] - 8, 32, 32);
         }
-    };
+        // draw circles
 
-    const drawCircles = () => {
         for (let circle of playfield.circles) {
             let [x, y] = circle.pos;
             let time = (Date.now() - circle.start) / 1000 / circle.interval;
@@ -128,36 +132,19 @@ function draw(canvas, ctx, updateGame) {
             ctx.arc(x, y, circle.radius, 0, 2 * Math.PI, true);
             ctx.stroke();
         }
-    };
 
-    const drawPlayer = () => ctx.drawImage(playerSprites[0], 0, 0, 64, 64, player.pos[0] - 32, player.pos[1] - 32, 64, 64);
+        // draw player
+        ctx.drawImage(playerSprites[0], 0, 0, 64, 64, player.pos[0] - 32, player.pos[1] - 32, 64, 64);
+        let display = document.getElementById("primaryDisplay");
+        display.innerHTML = "Money: " + player.moneys.paper;
+        requestAnimationFrame(draw);
+    }
 
-    // update logic
-    updateGame();
-    // clear old shit
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    draw();
 
-    // redraw
-    drawPapers();
-    drawCircles();
-    drawPlayer();
-
-    let display = document.getElementById("primaryDisplay");
-    display.innerHTML = "Money: " + player.moneys.paper;
-    requestAnimationFrame(() => draw(canvas, ctx, updateGame));
-}
-
-function loadGame() {
-    /**
-     * @type {HTMLCanvasElement}
-     */
-    const canvas = document.getElementById("canvas");
-    const ctx = canvas.getContext("2d");
-
-    canvas.width = 1280;
-    canvas.height = 720;
-
-    let held = false;
+    function spawnCircle(timestamp, pos, radius, interval) {
+        playfield.circles.push({ start: timestamp, pos: pos, radius: radius, interval: interval });
+    }
 
     function updateGame() {
         let repelFactor = 1;
@@ -165,8 +152,7 @@ function loadGame() {
         let frictionFactor = 0.93;
         let frictionThreshold = 0.025;
         let roundingFactor = 10;
-        //frictionRoundingFactorFactor
-        let frff = 100;
+        let frictionRoundingFactorFactor = 100;
 
         // spawn continuous stream of papers while held
         if (held) {
@@ -185,40 +171,29 @@ function loadGame() {
             let dy = y - player.pos[1];
 
             let dist = Math.hypot(dx, dy);
-            const doVelMagik = (toBeMagikd) => Math.floor(toBeMagikd * roundingFactor * frictionFactor * frff) / roundingFactor / frff;
-            const doPosMagik = (toBePos, toBeVel) => Math.round(toBePos * roundingFactor + toBeVel * roundingFactor) / roundingFactor;
 
-            // paper.vel[0] = Math.floor(paper.vel[0] * roundingFactor * frictionFactor * frictionRoundingFactorFactor) / roundingFactor / frictionRoundingFactorFactor;
-            // paper.vel[1] = Math.floor(paper.vel[1] * roundingFactor * frictionFactor * frictionRoundingFactorFactor) / roundingFactor / frictionRoundingFactorFactor;
+            paper.vel[0] = Math.floor(paper.vel[0] * roundingFactor * frictionFactor * frictionRoundingFactorFactor) / roundingFactor / frictionRoundingFactorFactor;
+            paper.vel[1] = Math.floor(paper.vel[1] * roundingFactor * frictionFactor * frictionRoundingFactorFactor) / roundingFactor / frictionRoundingFactorFactor;
 
-            // paper.pos[0] = Math.round(paper.pos[0] * roundingFactor + paper.vel[0] * roundingFactor) / roundingFactor;
-            // paper.pos[1] = Math.round(paper.pos[1] * roundingFactor + paper.vel[1] * roundingFactor) / roundingFactor;
-
-            // magic math
-            paper.vel[0] = doVelMagik(paper.vel[0]);
-            paper.vel[1] = doVelMagik(paper.vel[1]);
-            paper.pos[0] = doPosMagik(paper.pos[0], paper.vel[0]);
-            paper.pos[1] = doPosMagik(paper.pos[1], paper.vel[1]);
+            paper.pos[0] = Math.round(paper.pos[0] * roundingFactor + paper.vel[0] * roundingFactor) / roundingFactor;
+            paper.pos[1] = Math.round(paper.pos[1] * roundingFactor + paper.vel[1] * roundingFactor) / roundingFactor;
 
             if (dist <= repelRad) {
                 // Calculate repulsion force based on distance
-                //let randomForceOffsetFactor = (roundRand(50) + 55) / 100;
-                let force = ((repelRad - dist) / repelRad) * repelFactor; // * randomForceOffsetFactor;
+                let randomForceOffsetFactor = (rand(50) + 55) / 100;
+                let force = ((repelRad - dist) / repelRad) * repelFactor * randomForceOffsetFactor;
 
                 // Apply repulsion force in the direction away from the player
                 paper.vel[0] += (dx / dist) * force;
                 paper.vel[1] += (dy / dist) * force;
             } else {
-                const clamp = (wutIsBeingKlampd) => (Math.abs(wutIsBeingKlampd) < frictionThreshold ? 0 : wutIsBeingKlampd);
-                paper.vel[0] = clamp(paper.vel[0]);
-                paper.vel[1] = clamp(paper.vel[1]);
+                if (Math.abs(paper.vel[0]) < frictionThreshold) paper.vel[0] = 0;
+                if (Math.abs(paper.vel[1]) < frictionThreshold) paper.vel[1] = 0;
             }
 
             return true;
         });
     }
-
-    draw(canvas, ctx, updateGame);
 
     window.addEventListener("keypress", (event) => {
         let key = event.key;
@@ -230,12 +205,7 @@ function loadGame() {
                 playfield.papers = [];
                 break;
             case "q":
-                playfield.circles.push({
-                    start: Date.now(),
-                    pos: [640, 360],
-                    radius: document.getElementById("circleRadiusInput").value,
-                    interval: document.getElementById("circleIntervalInput").value,
-                });
+                spawnCircle(Date.now(), [640, 360], document.getElementById("circleRadiusInput").value, document.getElementById("circleIntervalInput").value);
                 break;
             default:
                 break;
@@ -250,7 +220,6 @@ function loadGame() {
         held = false;
     });
 
-    // interval ID
     let gameLoop = setInterval(loopFunc, 100);
 
     let counters = [
@@ -259,7 +228,7 @@ function loadGame() {
             every: 4,
             counter: 0,
             func: () => {
-                spawnPapers(10, 1);
+                spawnPapers(10, 1, false);
             },
         },
     ];
@@ -279,18 +248,15 @@ function loadGame() {
         const canvasLocation = canvas.getBoundingClientRect();
         let x = Math.floor(event.x - canvasLocation.x);
         let y = Math.floor(event.y - canvasLocation.y);
-
-        // borders
         if (x < 0) x = 0;
         if (x > 1280) x = 1280;
         if (y < 0) y = 0;
         if (y > 720) y = 720;
-
         player.pos = [x, y];
     });
 }
 
-window.addEventListener("load", loadSprites);
+window.addEventListener("load", load1);
 
 const windowDiv = document.querySelector(".floating-window");
 const topBar = windowDiv.querySelector(".top-bar");
