@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Radial Gradient Background</title>
+        <link rel="stylesheet" href="styles.css" />
+    </head>
+    <body>
+        <div class="floating-window">
+            <div class="top-bar uninteractable cursor font" tabindex="-1">Window</div>
+            <div class="content uninteractable cursor" id="window-content">
+                <p id="primaryDisplay" class="font">Loading...</p>
+                <input type="range" name="repelRadRange" id="repelRadRange" min="1" max="2000" value="200" />
+                <input type="range" name="devPaperSpawnRange" id="devPaperSpawnRange" min="0" max="330" value="200" />
+                <input type="text" name="circleRadiusInput" id="circleRadiusInput" />
+                <input type="text" name="circleIntervalInput" id="circleIntervalInput" />
+            </div>
+        </div>
+        <div id="canvas-wrapper">
+            <canvas height="1280" width="720" id="canvas" class="uninteractable"></canvas>
+        </div>
+        <script src="index.js"></script>
+    </body>
+</html>

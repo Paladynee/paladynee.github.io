@@ -1,0 +1,76 @@
+html,
+body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+body {
+    background: radial-gradient(circle at center, #151515, #000000);
+}
+
+#canvas-wrapper {
+    width: 1320px; /* Adjust the width to accommodate the border */
+    height: 760px; /* Adjust the height to accommodate the border */
+    background-color: #ffffff;
+    box-shadow: 0 0 40px 10px rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#canvas {
+    width: 1280px;
+    height: 720px;
+    cursor: none;
+}
+
+.floating-window {
+    position: absolute;
+    top: 50px;
+    left: 50px;
+    background-color: rgba(0, 0, 0, 0.5); /* Half opacity */
+    border: 1px solid #ccc;
+    padding: 5px;
+    z-index: 9999;
+}
+
+/* Styling for the top bar */
+.floating-window .top-bar {
+    height: 20px;
+    cursor: default;
+    background-color: #ccc;
+    padding: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-top: 2px solid #ffffff;
+    border-left: 2px solid #ffffff;
+    border-right: 2px solid #888888;
+    border-bottom: 2px solid #888888;
+}
+
+.font {
+    font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande", "Lucida Sans", Arial, sans-serif;
+    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+    color: #fff;
+}
+
+.uninteractable {
+    user-select: none;
+}
+
+.cursor {
+    cursor: default;
+}
+
+/* Styling for the content */
+.floating-window .content {
+    margin-top: 5px;
+    white-space: pre;
+    display: flex;
+    flex-direction: column;
+}
