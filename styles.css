@@ -1,76 +1,183 @@
+/** @format */
+
 html,
 body {
-    height: 100%;
     margin: 0;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    padding: 30px;
+    height: calc(100% - 60px);
+    width: calc(100% - 60px);
+    background-color: #010101;
 }
 
-body {
-    background: radial-gradient(circle at center, #151515, #000000);
-}
-
-#canvas-wrapper {
-    width: 1320px; /* Adjust the width to accommodate the border */
-    height: 760px; /* Adjust the height to accommodate the border */
-    background-color: #ffffff;
-    box-shadow: 0 0 40px 10px rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-#canvas {
-    width: 1280px;
-    height: 720px;
-    cursor: none;
-}
-
-.floating-window {
-    position: absolute;
-    top: 50px;
-    left: 50px;
-    background-color: rgba(0, 0, 0, 0.5); /* Half opacity */
-    border: 1px solid #ccc;
-    padding: 5px;
-    z-index: 9999;
-}
-
-/* Styling for the top bar */
-.floating-window .top-bar {
-    height: 20px;
-    cursor: default;
-    background-color: #ccc;
-    padding: 5px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-top: 2px solid #ffffff;
-    border-left: 2px solid #ffffff;
-    border-right: 2px solid #888888;
-    border-bottom: 2px solid #888888;
-}
-
-.font {
-    font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande", "Lucida Sans", Arial, sans-serif;
-    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
-    color: #fff;
-}
-
-.uninteractable {
+* {
     user-select: none;
-}
-
-.cursor {
     cursor: default;
 }
 
-/* Styling for the content */
-.floating-window .content {
-    margin-top: 5px;
-    white-space: pre;
+.grid {
+    display: grid;
+    grid-template-columns: 5fr 2fr;
+    grid-template-rows: 1fr 3fr;
+    height: 100%;
+    width: 100%;
+}
+
+.flexBox1 {
+    height: 100%;
+    width: 100%;
     display: flex;
     flex-direction: column;
+}
+
+.flexBox2 {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+}
+
+.flexSizeBig {
+    flex: 2;
+}
+
+.flexSizeSmall {
+    flex: 1;
+}
+
+.grid2 {
+    display: grid;
+    grid-template-columns: 1fr 4fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr 1fr;
+    height: 100%;
+    width: 100%;
+}
+
+.section {
+    margin: 5px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #0b0b0b;
+    color: white;
+    border: 1px solid #252525;
+}
+
+.savebutton {
+    height: 100%;
+    width: 100%;
+    flex: 1;
+    padding: 0;
+    margin: 0;
+    border: 1px solid green;
+    background-color: black;
+    color: white;
+    font-size: 4vh;
+}
+
+.savebutton:hover {
+    background-color: #070707;
+}
+
+.savebutton:active {
+    background-color: #111;
+}
+
+.dangerbutton {
+    height: 100%;
+    width: 100%;
+    flex: 1;
+    padding: 0;
+    margin: 0;
+    border: 0px;
+    background-color: #150000;
+    color: red;
+    font-size: 2vh;
+}
+
+.dangerbutton:hover {
+    background-color: #2a0000;
+}
+
+.dangerbutton:active {
+    background-color: #ff0000;
+    color: black;
+}
+
+.buybutton {
+    height: 100%;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    border: 0px solid;
+    background-color: black;
+    color: white;
+}
+
+.buybutton:hover {
+    background-color: #070707;
+}
+
+.buybutton:active {
+    background-color: #111;
+}
+
+.bigfont {
+    font-size: 10vh;
+}
+
+.smallfont {
+    font-size: 4vh;
+}
+
+.black {
+    background-color: #010101;
+}
+
+.second {
+    padding-top: 25px;
+    padding-left: 50px;
+    justify-content: left;
+    align-items: baseline;
+}
+
+.display {
+    margin: 1vh;
+}
+
+.upgrades {
+    padding: 1px;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.upgrade {
+    margin: 2px;
+    margin-bottom: 1px;
+    height: 50px;
+    display: flex;
+    justify-content: baseline;
+    align-items: center;
+    padding: 5px;
+    border: 4px solid #404040;
+    background-color: #151515;
+}
+
+.upgrade:hover {
+    background-color: #202020;
+}
+
+.upgrade:active {
+    background-color: #303030;
+}
+
+canvas {
+    top: 0;
+    left: 0;
+    position: absolute;
+    z-index: 1000;
+    opacity: 10%;
+    pointer-events: none;
 }

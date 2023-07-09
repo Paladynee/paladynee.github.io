@@ -1,23 +1,52 @@
+<!-- @format -->
+
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Radial Gradient Background</title>
         <link rel="stylesheet" href="styles.css" />
+        <script src="script.js" defer></script>
     </head>
     <body>
-        <div class="floating-window">
-            <div class="top-bar uninteractable cursor font" tabindex="-1">Window</div>
-            <div class="content uninteractable cursor" id="window-content">
-                <p id="primaryDisplay" class="font">Loading...</p>
-                <input type="range" name="repelRadRange" id="repelRadRange" min="1" max="2000" value="200" />
-                <input type="range" name="devPaperSpawnRange" id="devPaperSpawnRange" min="0" max="330" value="200" />
-                <input type="text" name="circleRadiusInput" id="circleRadiusInput" />
-                <input type="text" name="circleIntervalInput" id="circleIntervalInput" />
+        <canvas></canvas>
+        <div class="grid">
+            <div class="section bigfont">Resource List</div>
+            <div class="section">
+                <div class="flexBox1">
+                    <div class="flexBox2 flexSizeBig">
+                        <button class="savebutton" id="save">Save</button>
+                        <button class="savebutton" id="import">Import</button>
+                        <button class="savebutton" id="export">Export</button>
+                    </div>
+                    <div class="flexBox2 flexSizeSmall">
+                        <button class="dangerbutton" id="hardreset">Hard Reset</button>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="grid2 black">
+                    <div class="section">
+                        <div id="dollars" class="smallfont">dollars:</div>
+                    </div>
+                    <div class="section">
+                        <div id="dollars_display" class="display smallfont">0</div>
+                    </div>
+                    <div class="section">
+                        <button id="dollars_buy" class="buybutton">purchase 1</button>
+                    </div>
+                    <div class="section"></div>
+                    <div class="section"></div>
+                    <div class="section"></div>
+                    <div class="section"></div>
+                    <div class="section"></div>
+                    <div class="section"></div>
+                    <div class="section"></div>
+                    <div class="section"></div>
+                    <div class="section"></div>
+                </div>
+            </div>
+            <div class="section">
+                <div class="upgrades" id="upgrades"></div>
             </div>
         </div>
-        <div id="canvas-wrapper">
-            <canvas height="1280" width="720" id="canvas" class="uninteractable"></canvas>
-        </div>
-        <script src="index.js"></script>
     </body>
 </html>
