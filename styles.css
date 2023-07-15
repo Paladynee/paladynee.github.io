@@ -177,7 +177,80 @@ canvas {
     top: 0;
     left: 0;
     position: absolute;
-    z-index: 1000;
+    z-index: 100;
     opacity: 10%;
     pointer-events: none;
+}
+
+.importbox {
+    z-index: 200;
+    position: absolute;
+    top: calc(50% - 30vh);
+    left: calc(50% - 30vw);
+    height: 60vh;
+    width: 60vw;
+    background-color: black;
+    color: white;
+    border: 1px solid gray;
+}
+
+.importInput {
+    z-index: 201;
+    position: absolute;
+    top: 50%;
+    left: 10%;
+    width: 80%;
+    height: calc(20px + 1vh);
+    cursor: auto;
+    padding: 0;
+    border: 5px solid gray;
+    padding-left: 5px;
+}
+
+.description {
+    position: absolute;
+    margin: auto;
+    left: 0;
+    top: 30%;
+    font-size: 3vh;
+    width: 100%;
+    text-align: center;
+}
+
+.submitbutton {
+    position: absolute;
+    top: 70%;
+    left: 45%;
+    width: 10%;
+    height: calc(20px + 1vh);
+}
+
+.closebutton {
+    z-index: 210;
+    position: absolute;
+    height: 5vh;
+    width: 5vh;
+    background-color: #b00000;
+    border: 0.5vh solid #400000;
+    left: calc(100% - 5vh);
+}
+
+.closebutton:hover {
+    background-color: #800000;
+}
+
+.closebutton:active {
+    background-color: #600000;
+    border: 0.5vh solid #400000;
+}
+
+.overlay {
+    z-index: 199;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background-color: #000;
+    opacity: 50%;
 }

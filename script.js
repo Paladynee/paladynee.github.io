@@ -1,6 +1,7 @@
 /** @format */
 
 let halt = false;
+let gameIntervalId;
 
 let player = {
     resources: {
@@ -28,12 +29,15 @@ let player = {
         dollars: [
             {
                 bought: false,
-                effect: (generatedDollars) => generatedDollars ** 2,
                 cost: 1000,
                 description: "Gained dollars ^ 2, Cost: 1000 dollars",
             },
         ],
     },
+};
+
+let upgradeEffects = {
+    dollars: [(generatedDollars) => generatedDollars ** 2],
 };
 
 // check if savefile exists
@@ -53,6 +57,8 @@ if (data !== null) {
         }
     }
 }
+
+console.log(player);
 
 let onScreenObjects = [];
 
@@ -77,8 +83,8 @@ let saveButtons = {
 };
 
 saveButtons.save.onclick = () => saveGame(Date.now());
-saveButtons.import.onclick = () => createObject();
-saveButtons.export.onclick = () => saveGame(Date.now());
+saveButtons.import.onclick = () => importSave();
+saveButtons.export.onclick = () => exportSave();
 saveButtons.hardreset.onclick = () => {
     localStorage.clear();
     location.reload();
@@ -131,6 +137,71 @@ function handleUpgradeBuy(index, upgradeInfo, element) {
         player.upgrades.dollars[index].bought = true;
         html.upgrades.removeChild(element);
     }
+}
+
+let importBox = {};
+
+function importSave() {
+    let element = document.createElement("div");
+    let elementCloseButton = document.createElement("button");
+    let interactionBlocker = document.createElement("div");
+    let importInput = document.createElement("input");
+    let descriptionDiv = document.createElement("p");
+    let submitButton = document.createElement("button");
+    submitButton.classList.add("submitbutton");
+    submitButton.innerHTML = "Load Save";
+    submitButton.onclick = () => handleSaveImport(importInput.value);
+    descriptionDiv.innerHTML = "Input your save file here:";
+    descriptionDiv.classList.add("description");
+    importInput.type = "text";
+    importInput.classList.add("importInput");
+    elementCloseButton.classList.add("closebutton");
+    elementCloseButton.onclick = () => closeDialogueBox();
+    element.classList.add("importbox");
+    interactionBlocker.classList.add("overlay");
+    element.appendChild(elementCloseButton);
+    element.appendChild(descriptionDiv);
+    element.appendChild(importInput);
+    element.appendChild(submitButton);
+    document.body.appendChild(interactionBlocker);
+    document.body.appendChild(element);
+    importBox.element = element;
+    importBox.overlay = interactionBlocker;
+}
+
+function handleSaveImport(text) {
+    console.log(text);
+    try {
+        let text2 = atob(text);
+        let json = JSON.parse(text2);
+        clearInterval(gameIntervalId);
+        player = json;
+        closeDialogueBox();
+        gameIntervalId = setInterval(updateGame, 25);
+    } catch (err) {
+        alert("invalid or broken save file.");
+    }
+}
+
+function closeDialogueBox() {
+    document.body.removeChild(importBox.element);
+    document.body.removeChild(importBox.overlay);
+    importBox = {};
+}
+
+function exportSave() {
+    let input = document.createElement("input");
+    let savedata = btoa(JSON.stringify(player));
+    input.value = savedata;
+    input.select();
+    input.setSelectionRange(0, 1024 * 1024);
+    navigator.clipboard.writeText(input.value);
+
+    let blob = new Blob([savedata], { type: "text/plain" });
+    let anchor = document.createElement("a");
+    anchor.href = URL.createObjectURL(blob);
+    anchor.download = "SAVEFILE_" + Date.now() + ".txt";
+    anchor.click();
 }
 
 function drawCanvas() {
@@ -196,9 +267,9 @@ function updateGame() {
     // update resources
     let newResources = player.resources.dollars.generators.amount * deltaTime;
 
-    player.upgrades.dollars.forEach((upg) => {
+    player.upgrades.dollars.forEach((upg, index) => {
         if (upg.bought) {
-            newResources = upg.effect(newResources);
+            newResources = upgradeEffects.dollars[index](newResources);
         }
     });
 
@@ -260,5 +331,5 @@ window.addEventListener("resize", updateCanvasSize);
 // start game if everything went well
 
 if (!halt) {
-    let gameIntervalId = setInterval(updateGame, 25);
+    gameIntervalId = setInterval(updateGame, 25);
 }
