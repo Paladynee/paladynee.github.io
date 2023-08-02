@@ -2,10 +2,17 @@
 
 let halt = false;
 let gameIntervalId;
+let debug = true;
 
 let player = {
     resources: {
         dollars: {
+            amount: 1,
+            generators: {
+                amount: 0,
+            },
+        },
+        sausages: {
             amount: 1,
             generators: {
                 amount: 0,
@@ -22,22 +29,37 @@ let player = {
         lastUpdate: Date.now(),
         lastPhysicsUpdate: performance.now(),
         lastSave: Date.now(),
-        saveInterval: 5, // 5 seconds
-        autoSave: false,
+        saveInterval: 10, // 5 seconds
+        autoSave: true,
     },
     upgrades: {
         dollars: [
             {
                 bought: false,
                 cost: 1000,
-                description: "Gained dollars ^ 2, Cost: 1000 dollars",
+                description: "Gained dollars * 2, Cost: 1000 dollars",
+            },
+            {
+                bought: false,
+                cost: 10000,
+                description: "Gained dollars ^ 1.02, Cost: 10000 dollars",
+            },
+        ],
+        sausages: [
+            {
+                bought: false,
+                cost: 50000,
+                description: "Gained dollars * Sausages amount, Cost: 50000 dollars",
             },
         ],
     },
 };
 
+if (debug) console.log(`Initialized player`, player);
+
 let upgradeEffects = {
-    dollars: [(generatedDollars) => generatedDollars ** 2],
+    dollars: [(generatedDollars) => generatedDollars * 2, (generatedDollars) => generatedDollars ** 1.05],
+    sausages: [(generated) => generated * player.resources.sausages.amount],
 };
 
 // check if savefile exists
@@ -46,34 +68,46 @@ if (data !== null) {
     try {
         let parsed = JSON.parse(atob(data));
         player = parsed;
+        if (debug) console.log("Found savefile, replaced player with save data.");
     } catch {
+        if (debug) console.log("Some error has been detected with the save file, trying the backup...");
         try {
             let backupData = JSON.parse(localStorage.getItem("saveDataOld"));
             let parsed = atob(backupData);
             player = parsed;
+            if (debug) console.log("Loaded backup data. Good to go.");
         } catch {
             console.error("COULD NOT PARSE EXISTING SAVE DATA, ABORTING!");
             halt = true;
         }
     }
+} else {
+    if (debug) console.log("Save data does not exist.");
 }
-
-console.log(player);
 
 let onScreenObjects = [];
 
 let html = {
     display: document.getElementById("dollars_display"),
-    buy: document.getElementById("dollars_buy"),
+    display2: document.getElementById("sausages_display"),
+    buy1: document.getElementById("dollars_buy"),
+    buy2: document.getElementById("sausages_buy"),
     canvas: document.querySelector("canvas"),
     upgrades: document.getElementById("upgrades"),
 };
+
+if (debug) console.log("Initialized HTML element references.");
 
 let costFunctions = {
     dollars: {
         generators: () => (player.resources.dollars.generators.amount * 2) ** (1 + player.resources.dollars.generators.amount / 1000) + 1,
     },
+    sausages: {
+        generators: () => (player.resources.sausages.generators.amount * 512) ** (1 + player.resources.sausages.generators.amount / 100) + 1000,
+    },
 };
+
+if (debug) console.log("Initialized cost functions.");
 
 let saveButtons = {
     save: document.getElementById("save"),
@@ -81,6 +115,8 @@ let saveButtons = {
     export: document.getElementById("export"),
     hardreset: document.getElementById("hardreset"),
 };
+
+if (debug) console.log("Initialized save button references.");
 
 saveButtons.save.onclick = () => saveGame(Date.now());
 saveButtons.import.onclick = () => importSave();
@@ -91,12 +127,31 @@ saveButtons.hardreset.onclick = () => {
     console.log("HARD RESETTED THE GAME");
 };
 
-html.buy.onclick = () => handleBuy(0);
+if (debug) console.log("Initialized save button event handlers.");
+
+html.buy1.onclick = () => handleBuy(0);
+html.buy2.onclick = () => handleBuy(1);
+
+if (debug) console.log("Initialized buy button event handlers.");
 
 for (let index in player.upgrades.dollars) {
     let upgrade = player.upgrades.dollars[index];
+    if (debug) console.log("Adding dollar upgrade elements to the document.");
+    if (upgrade.bought && debug) console.log("Bought upgrade, skipping...");
     if (upgrade.bought) continue;
-    let element = document.createElement("div");
+    let element = document.createElement("button");
+    element.classList.add("upgrade");
+    element.innerHTML = upgrade.description;
+    element.onclick = () => handleUpgradeBuy(index, upgrade, element);
+    html.upgrades.appendChild(element);
+}
+
+for (let index in player.upgrades.sausages) {
+    let upgrade = player.upgrades.sausages[index];
+    if (debug) console.log("Adding sausage upgrade elements to the document.");
+    if (upgrade.bought && debug) console.log("Bought upgrade, skipping...");
+    if (upgrade.bought) continue;
+    let element = document.createElement("button");
     element.classList.add("upgrade");
     element.innerHTML = upgrade.description;
     element.onclick = () => handleUpgradeBuy(index, upgrade, element);
@@ -108,6 +163,8 @@ const ctx = html.canvas.getContext("2d");
 function updateCanvasSize() {
     let heightRatio = innerHeight / html.canvas.height;
     let widthRatio = innerWidth / html.canvas.width;
+
+    if (debug) console.log(`Updating canvas size to ${innerWidth}x${innerHeight}`);
 
     html.canvas.height = innerHeight;
     html.canvas.width = innerWidth;
@@ -132,6 +189,7 @@ function draw() {
 }
 
 function handleUpgradeBuy(index, upgradeInfo, element) {
+    if (debug) console.log("Handle upgrade buy.");
     if (player.resources.dollars.amount >= upgradeInfo.cost) {
         player.resources.dollars.amount -= upgradeInfo.cost;
         player.upgrades.dollars[index].bought = true;
@@ -142,6 +200,7 @@ function handleUpgradeBuy(index, upgradeInfo, element) {
 let importBox = {};
 
 function importSave() {
+    if (debug) console.log("Showing save import dialog.");
     let element = document.createElement("div");
     let elementCloseButton = document.createElement("button");
     let interactionBlocker = document.createElement("div");
@@ -245,35 +304,49 @@ function createObject() {
     let newObj = {
         x: html.canvas.width / 2 + rand(100) - 50,
         y: html.canvas.height / 2 + rand(100) - 50,
-        velx: rand(20) - 10, //TODO select random
+        velx: rand(30) - 15, //TODO select random
         vely: -rand(20), //TODO select random,
-        size: rand(14) + 2,
+        size: rand(15) + 5,
     };
     onScreenObjects.push(newObj);
 }
 
 function updateDisplays() {
     html.display.innerHTML = player.resources.dollars.amount.toFixed(2);
-    html.buy.innerHTML = `purchase 1<br>cost: ${costFunctions.dollars.generators().toFixed(2)}`;
+    html.display2.innerHTML = player.resources.sausages.amount.toFixed(2);
+    html.buy1.innerHTML = `purchase 1<br>cost: ${costFunctions.dollars.generators().toFixed(2)}`;
+    html.buy2.innerHTML = `purchase 1<br>cost: ${costFunctions.sausages.generators().toFixed(2)}`;
 }
 
 function updateGame() {
     // find deltaTime
     let now = Date.now();
-    let deltaTime = (now - player.timers.lastUpdate) / 1000; // division by 1000 to convert into seconds from milliseconds
+    let deltaTime = (now - player.timers.lastUpdate) / 1000;
 
     player.timers.lastUpdate = now;
 
     // update resources
-    let newResources = player.resources.dollars.generators.amount * deltaTime;
+    let newResources_dollars = player.resources.dollars.generators.amount;
+    let newResources_sausages = player.resources.sausages.generators.amount;
 
     player.upgrades.dollars.forEach((upg, index) => {
         if (upg.bought) {
-            newResources = upgradeEffects.dollars[index](newResources);
+            if (index === 0) {
+                newResources_dollars = upgradeEffects.sausages[index](newResources_dollars);
+                return;
+            }
+            newResources_dollars = upgradeEffects.dollars[index](newResources_dollars);
         }
     });
 
-    player.resources.dollars.amount += newResources;
+    player.upgrades.sausages.forEach((upg, index) => {
+        if (upg.bought) {
+            newResources_sausages = upgradeEffects.sausages[index](newResources_sausages);
+        }
+    });
+
+    player.resources.dollars.amount += newResources_dollars * deltaTime;
+    player.resources.sausages.amount += newResources_sausages * deltaTime;
 
     // make physic thing work
     let newDollars = Math.floor(player.resources.dollars.amount) - player.physics.lastWholeDollars;
@@ -284,7 +357,7 @@ function updateGame() {
     }
 
     if (newDollars > 0) {
-        if (newDollars > 50) newDollars = 50;
+        if (newDollars > 10) newDollars = 10;
         for (let inc = 0; inc < newDollars; inc++) {
             createObject();
         }
@@ -305,16 +378,26 @@ function saveGame(now) {
     localStorage.setItem("saveData", btoa(JSON.stringify(player)));
     localStorage.setItem("saveDataOld", oldSave);
     player.timers.lastSave = now;
-    console.log("saved game at " + new Date());
+    if (debug) console.log("Saved the game at " + new Date());
 }
 
 function handleBuy(type) {
+    if (debug) console.log("Handle buy for type " + type);
+    let nextCost = 1;
     switch (type) {
         case 0:
             // type: dollars generator
-            let nextCost = costFunctions.dollars.generators();
+            nextCost = costFunctions.dollars.generators();
             if (player.resources.dollars.amount >= nextCost) {
                 player.resources.dollars.generators.amount += 1;
+                player.resources.dollars.amount -= nextCost;
+            }
+            break;
+        case 1:
+            // type: sausages generator
+            nextCost = costFunctions.sausages.generators();
+            if (player.resources.dollars.amount >= nextCost) {
+                player.resources.sausages.generators.amount += 1;
                 player.resources.dollars.amount -= nextCost;
             }
             break;
@@ -332,4 +415,36 @@ window.addEventListener("resize", updateCanvasSize);
 
 if (!halt) {
     gameIntervalId = setInterval(updateGame, 25);
+} else {
+    if (debug) console.log("Game halted, not starting game loop.");
+}
+
+let buttons = document.querySelectorAll("button");
+
+for (let button of buttons) {
+    button.addEventListener("mouseup", handleButtonRelease);
+    button.addEventListener("mousedown", handleButtonPress);
+    if (debug) console.log("Added audio handlers for button.");
+}
+
+function handleButtonPress() {
+    let audioElement = createAudio("./buttonpress.wav");
+    audioElement.play();
+    document.body.appendChild(audioElement);
+    audioElement.addEventListener("ended", () => {
+        document.body.removeChild(audioElement);
+    });
+}
+
+function handleButtonRelease() {
+    let audioElement = createAudio("./buttonrelease.wav");
+    audioElement.play();
+    document.body.appendChild(audioElement);
+    audioElement.addEventListener("ended", () => {
+        document.body.removeChild(audioElement);
+    });
+}
+
+function createAudio(path) {
+    return new Audio(`./${path}`);
 }
