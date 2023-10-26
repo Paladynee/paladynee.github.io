@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FizzBuzz</title>
+    <script src="fizzbuzz.js" defer></script>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <p id="label_amount">FizzBuzz until:</p>
+    <div id="wrapper_amount">
+      <input type="text" name="amount" id="amount" />
+      <button id="button" onclick="submit()">Submit</button>
+    </div>
+    <p id="warn"></p>
+    <div id="wrapper_divisors">
+      <p id="label_divisors">Divisors:</p>
+      <input type="text" name="divisors" id="divisors" value="3=Fizz 5=Buzz" />
+    </div>
+    <div id="wrapper_output">
+      <p id="label_output">Console</p>
+      <pre id="display">none...</pre>
+    </div>
+  </body>
+</html>

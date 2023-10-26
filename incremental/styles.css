@@ -1,0 +1,258 @@
+/** @format */
+
+html,
+body {
+    margin: 0;
+    padding: 30px;
+    height: calc(100% - 60px);
+    width: calc(100% - 60px);
+    background-color: #010101;
+}
+
+* {
+    user-select: none;
+    cursor: default;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 5fr 2fr;
+    grid-template-rows: 1fr 3fr;
+    height: 100%;
+    width: 100%;
+}
+
+.flexBox1 {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.flexBox2 {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+}
+
+.flexSizeBig {
+    flex: 2;
+}
+
+.flexSizeSmall {
+    flex: 1;
+}
+
+.grid2 {
+    display: grid;
+    grid-template-columns: 1fr 4fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr 1fr;
+    height: 100%;
+    width: 100%;
+}
+
+.section {
+    margin: 5px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #0b0b0b;
+    color: white;
+    border: 1px solid #252525;
+}
+
+.savebutton {
+    height: 100%;
+    width: 100%;
+    flex: 1;
+    padding: 0;
+    margin: 0;
+    border: 1px solid green;
+    background-color: black;
+    color: white;
+    font-size: 4vh;
+}
+
+.savebutton:hover {
+    background-color: #070707;
+}
+
+.savebutton:active {
+    background-color: #111;
+}
+
+.dangerbutton {
+    height: 100%;
+    width: 100%;
+    flex: 1;
+    padding: 0;
+    margin: 0;
+    border: 0px;
+    background-color: #150000;
+    color: red;
+    font-size: 2vh;
+}
+
+.dangerbutton:hover {
+    background-color: #2a0000;
+}
+
+.dangerbutton:active {
+    background-color: #ff0000;
+    color: black;
+}
+
+.buybutton {
+    height: 100%;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    border: 0px solid;
+    background-color: black;
+    color: white;
+}
+
+.buybutton:hover {
+    background-color: #070707;
+}
+
+.buybutton:active {
+    background-color: #111;
+}
+
+.bigfont {
+    font-size: 10vh;
+}
+
+.smallfont {
+    font-size: 4vh;
+}
+
+.black {
+    background-color: #010101;
+}
+
+.second {
+    padding-top: 25px;
+    padding-left: 50px;
+    justify-content: left;
+    align-items: baseline;
+}
+
+.display {
+    margin: 1vh;
+}
+
+.upgrades {
+    padding: 1px;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.upgrade {
+    margin: 2px;
+    margin-bottom: 1px;
+    height: 6vh;
+    display: flex;
+    justify-content: baseline;
+    align-items: center;
+    font-size: 1rem;
+    padding: 5px;
+    border: 4px solid #404040;
+    background-color: #151515;
+    color: #fff;
+}
+
+.upgrade:hover {
+    background-color: #202020;
+}
+
+.upgrade:active {
+    background-color: #303030;
+}
+
+canvas {
+    top: 0;
+    left: 0;
+    position: absolute;
+    z-index: 100;
+    opacity: 10%;
+    pointer-events: none;
+}
+
+.importbox {
+    z-index: 200;
+    position: absolute;
+    top: calc(50% - 30vh);
+    left: calc(50% - 30vw);
+    height: 60vh;
+    width: 60vw;
+    background-color: black;
+    color: white;
+    border: 1px solid gray;
+}
+
+.importInput {
+    z-index: 201;
+    position: absolute;
+    top: 50%;
+    left: 10%;
+    width: 80%;
+    height: calc(20px + 1vh);
+    cursor: auto;
+    padding: 0;
+    border: 5px solid gray;
+    padding-left: 5px;
+}
+
+.description {
+    position: absolute;
+    margin: auto;
+    left: 0;
+    top: 30%;
+    font-size: 3vh;
+    width: 100%;
+    text-align: center;
+}
+
+.submitbutton {
+    position: absolute;
+    top: 70%;
+    left: 45%;
+    width: 10%;
+    height: calc(20px + 1vh);
+}
+
+.closebutton {
+    z-index: 210;
+    position: absolute;
+    height: 5vh;
+    width: 5vh;
+    background-color: #b00000;
+    border: 0.5vh solid #400000;
+    left: calc(100% - 5vh);
+}
+
+.closebutton:hover {
+    background-color: #800000;
+}
+
+.closebutton:active {
+    background-color: #600000;
+    border: 0.5vh solid #400000;
+}
+
+.overlay {
+    z-index: 199;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background-color: #000;
+    opacity: 50%;
+}
