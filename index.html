@@ -1,58 +1,51 @@
-<!-- @format -->
-
 <!DOCTYPE html>
-<html>
-    <head>
-        <link rel="stylesheet" href="styles.css" />
-        <script src="script.js" defer></script>
-    </head>
-    <body>
-        <canvas></canvas>
-        <div class="grid">
-            <div class="section bigfont">Resource List</div>
-            <div class="section">
-                <div class="flexBox1">
-                    <div class="flexBox2 flexSizeBig">
-                        <button class="savebutton" id="save">Save</button>
-                        <button class="savebutton" id="import">Import</button>
-                        <button class="savebutton" id="export">Export</button>
-                    </div>
-                    <div class="flexBox2 flexSizeSmall">
-                        <button class="dangerbutton" id="hardreset">Hard Reset</button>
-                    </div>
-                </div>
-            </div>
-            <div>
-                <div class="grid2 black">
-                    <div class="section">
-                        <div id="dollars" class="smallfont">dollars:</div>
-                    </div>
-                    <div class="section">
-                        <div id="dollars_display" class="display smallfont">0</div>
-                    </div>
-                    <div class="section">
-                        <button id="dollars_buy" class="buybutton">purchase 1</button>
-                    </div>
-                    <div class="section">
-                        <div id="sausages" class="smallfont">sausages:</div>
-                    </div>
-                    <div class="section">
-                        <div id="sausages_display" class="display smallfont">0</div>
-                    </div>
-                    <div class="section">
-                        <button id="sausages_buy" class="buybutton">purchase 1</button>
-                    </div>
-                    <div class="section"></div>
-                    <div class="section"></div>
-                    <div class="section"></div>
-                    <div class="section"></div>
-                    <div class="section"></div>
-                    <div class="section"></div>
-                </div>
-            </div>
-            <div class="section">
-                <div class="upgrades" id="upgrades"></div>
-            </div>
-        </div>
-    </body>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="script.js" defer></script>
+    <link rel="stylesheet" href="styles.css" />
+    <title>Paladynee</title>
+  </head>
+  <body>
+    <img src="lowres_thing_lol.jpg" alt="bruh" class="bg">
+    <div id="wrapper">
+      <p id="display">_</p>
+    </div>
+    <div id="outer">
+      <pre class="nomarg">my games:</pre>
+      <div id="games">
+        <a href="/modular_fizz/index.html">
+          <div id="modular_fizz">
+            <img
+              class="preview_image"
+              src="fizzbuzz_preview.png"
+              alt="FizzBuzz"
+            />
+            <b class="title">FizzBuzz</b>
+          </div>
+        </a>
+        <a href="/incremental/index.html">
+          <div id="incremental">
+            <img
+            class="preview_image"
+            src="incremental_preview.png"
+            alt="Incremental Game"
+            />
+            <b class="title">Incremental Game</b>
+          </div>
+        </a>
+        <a href="/game/index.html">
+          <div id="hashnet">
+            <img
+              class="preview_image"
+              src="hashnet_preview.png"
+              alt="HashNet Simulator"
+            />
+            <b class="title">HashNet Simulator</b>
+          </div>
+        </a>
+      </div>
+    </div>
+  </body>
 </html>
