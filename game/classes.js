@@ -6,17 +6,33 @@ class Vec2D {
     this.y = y;
   }
 
+  /**
+   * @param {Vec2D} vec
+   */
   set(vec) {
     this.x = vec.x;
     this.y = vec.y;
   }
 
+  /**
+   * @param {Vec2D} vec
+   */
   add(vec) {
     return new Vec2D(this.x + vec.x, this.y + vec.y);
   }
 
-  mult1D(factor) {
+  /**
+   * @param {number} factor
+   */
+  scale(factor) {
     return new Vec2D(this.x * factor, this.y * factor);
+  }
+
+  /**
+   * @param {Vec2D} vec
+   */
+  scaleVec(vec) {
+    return new Vec2D(this.x * vec.x, this.y * vec.y);
   }
 
   normalize() {
@@ -25,17 +41,47 @@ class Vec2D {
     return new Vec2D(this.x / hypot, this.y / hypot);
   }
 
+  square() {
+    let direction = this.normalize();
+    let mag = this.mag() ** 2;
+    return direction.scale(mag);
+  }
+
+  /**
+   * @param {Vec2D} target
+   * @param {Vec2D} unit_size
+   */
+  oneOverDistanceSquared(target, unit_size) {
+    let point_vec = this.scaleVec(unit_size).to(target.scaleVec(unit_size));
+    let direction = point_vec.normalize();
+    let mag = 1 / (point_vec.mag() ** 2 + 0.1);
+    return direction.scale(mag);
+  }
+
   mag() {
     let mag = Math.sqrt(this.x * this.x + this.y * this.y);
     return mag == 0 ? 0 : mag;
   }
 
+  /**
+   * @param {Vec2D} vec
+   */
   to(vec) {
     return new Vec2D(vec.x - this.x, vec.y - this.y);
   }
 
+  /**
+   * @param {Vec2D} vec
+   */
   from(vec) {
     return new Vec2D(this.x - vec.x, this.y - vec.y);
+  }
+
+  /**
+   * @param {(component: number) => number} fn
+   */
+  map(fn) {
+    return new Vec2D(fn(this.x), fn(this.y));
   }
 
   copy() {
@@ -45,10 +91,34 @@ class Vec2D {
   arr() {
     return [this.x, this.y];
   }
+
+  /**
+   * @param {number} angle
+   */
+  rotate(angle) {
+    const cosAngle = Math.cos(angle);
+    const sinAngle = Math.sin(angle);
+
+    const newX = this.x * cosAngle - this.y * sinAngle;
+    const newY = this.x * sinAngle + this.y * cosAngle;
+
+    return new Vec2D(newX, newY);
+  }
 }
 
 class Rigid {
-  constructor({
+  /**
+   * @param {HTMLCanvasElement} parentCanvas
+   * @param {CanvasRenderingContext2D} ctx
+   * @param {Vec2D} size
+   * @param {Vec2D} pos
+   * @param {Vec2D} vel
+   * @param {Vec2D} acc
+   * @param {string} style
+   * @param {Vec2D} target
+   * @param {number} friction
+   */
+  constructor(
     parentCanvas,
     ctx,
     size = new Vec2D(10, 10),
@@ -57,8 +127,8 @@ class Rigid {
     acc = new Vec2D(0, 0),
     style = "rgb(255, 0, 0)",
     target = new Vec2D(parentCanvas.width / 2, parentCanvas.height / 2),
-    friction = 0.5,
-  }) {
+    friction = 0.5
+  ) {
     this.parentCanvas = parentCanvas;
     this.canvasOrigin = new Vec2D(
       parentCanvas.width / 2,
@@ -77,7 +147,7 @@ class Rigid {
 
   update(dt, time) {
     this.physics(dt);
-    this.border();
+    if (clamping_behavior) this.border();
     this.outline(time);
     this.draw(time);
   }
@@ -128,10 +198,22 @@ class Rigid {
 
   physics(dt) {
     // first acc, then vel, then pos
-    this.acc.set(this.pos.to(this.target).normalize().mult1D(10000));
-    this.vel.set(this.vel.add(this.acc.mult1D(dt)));
-    this.vel.set(this.vel.mult1D(this.friction ** dt));
-    this.pos.set(this.pos.add(this.vel.mult1D(dt)));
+    this.acc.set(
+      this.pos
+        .oneOverDistanceSquared(
+          this.target,
+          new Vec2D(1 / this.parentCanvas.width, 1 / this.parentCanvas.width)
+        )
+        .scale(1000)
+      // this.pos
+      //   .to(this.target)
+      //   .mult1D(10)
+      //   .add(new Vec2D(random(-5000, 5000), random(-5000, 5000)))
+      //   .add(this.pos.to(this.target).normalize().mult1D(5000))
+    );
+    this.vel.set(this.vel.add(this.acc.scale(dt)));
+    this.vel.set(this.vel.scale(this.friction ** dt));
+    this.pos.set(this.pos.add(this.vel.scale(dt)));
   }
 
   border() {

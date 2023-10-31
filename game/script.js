@@ -1,16 +1,45 @@
 /** @format */
 
+function getMouseVel(newPos, dt) {
+  if (dt <= 0) return;
+  last_mousePos.push(new Vec2D(newPos.x, newPos.y));
+  if (last_mousePos.length > 360) last_mousePos.shift();
+
+  let sum = 0;
+  const conditional = Math.min(last_mousePos.length, Math.floor(0.25 / dt)) - 1;
+  if (!last_mousePos.find((a) => a.mag() > 0)) return;
+
+  // console.log(conditional);
+  let final_divisor = 0;
+  for (let i = 0; i < conditional; i++) {
+    let mag = last_mousePos[i].from(last_mousePos[i + 1]).mag();
+    if (mag === 0) {
+    } else {
+      sum += (mag * 1000) / dt;
+      final_divisor += 1;
+    }
+  }
+  sum /= final_divisor;
+
+  // console.log(sum);
+}
+
 function draw() {
+  handleContinuousStrokes(held_keys);
+
   ctx.clearRect(0, 0, can.width, can.height);
 
   let now = performance.now();
   let dt = (now - time) / 1000;
   time = now;
 
-  if (dt > 0.1) dt = 0.1;
+  getMouseVel(mousePos, dt);
 
-  let grid_spacing_px = 100;
-  let grid_divisor = 100;
+  if (dt > 0.1) dt = 0.1;
+  if (dt <= 0) dt = 0.001;
+
+  let grid_spacing_px = 50;
+  let grid_divisor = 50;
 
   ctx.strokeStyle = "#404040";
   ctx.lineWidth = 1;
@@ -36,9 +65,8 @@ function draw() {
     ctx.stroke();
   }
 
-  line_offset = (line_offset + dt * 25) % grid_divisor;
-
   dt /= timeDilation;
+  line_offset = (line_offset + 0.5 + dt * 100) % grid_divisor;
 
   for (let i = 0; i < objects.length; i++) {
     objects[i].update(dt, time);
@@ -106,7 +134,13 @@ function draw() {
   requestAnimationFrame(draw);
 }
 
+/**
+ * @type {HTMLCanvasElement}
+ */
 let can = document.querySelector("canvas");
+/**
+ * @type {CanvasRenderingContext2D}
+ */
 let ctx = can.getContext("2d");
 resize();
 window.addEventListener("resize", resize);
@@ -116,6 +150,7 @@ let mousePos = new Vec2D(can.width / 2, can.height / 2);
 window.addEventListener("mousemove", (e) => {
   mousePos.set(new Vec2D(e.clientX, e.clientY));
 });
+let last_mousePos = [];
 
 let helpmenu = true;
 let line_offset = 0;
@@ -134,41 +169,40 @@ let antipalette = generateHsvLumPalette(
 )
   .map(hsvToRgb)
   .map(rgbToStyleString);
+let held_keys = new Set();
+let clamping_behavior = true;
 
 // let logged = false;
 
 window.addEventListener("mousedown", (e) => {
-  for (let i = 0; i < objects.length; i++) {
-    let dist = objects[i].pos.from(mousePos);
-    let pow = 1000000 / (dist.mag() + 100);
-    // console.log(pow);
-    objects[i].vel.set(
-      objects[i].vel.add(
-        objects[i].pos.from(objects[i].target).normalize().mult1D(pow)
-      )
-    );
+  if (e.button === 0) {
+    for (let i = 0; i < objects.length; i++) {
+      let dist = objects[i].pos.from(objects[i].target).mag();
+      let direction = objects[i].pos.from(objects[i].target).normalize();
+      let pow = 1000000 / (dist + 100) / 2;
+      objects[i].vel.set(objects[i].vel.add(direction.scale(pow)));
+    }
+  } else {
+    for (let i = 0; i < objects.length; i++) {
+      let dist = objects[i].pos.to(objects[i].target).mag();
+      let direction = objects[i].pos.to(objects[i].target).normalize();
+      let pow = 5 * dist;
+      objects[i].vel.set(direction.scale(pow));
+    }
   }
 });
 
+window.addEventListener("contextmenu", (e) => {
+  e.preventDefault();
+});
+
 window.addEventListener("keydown", (e) => {
-  if (e.key != "+" && e.key != "-" && e.key != "Escape") {
-    resetColors();
-  } else {
-    if (e.key == "+") {
-      hashnet_size += 3;
-      if (hashnet_size >= objects.length) hashnet_size = objects.length;
-    }
-    if (e.key == "-") {
-      hashnet_size -= 3;
-      if (hashnet_size < 0) hashnet_size = 0;
-    }
-    if (e.key == "Escape") {
-      helpmenu
-        ? (document.querySelector(".info").style = "display: none")
-        : (document.querySelector(".info").style = "display: block");
-      helpmenu = !helpmenu;
-    }
-  }
+  held_keys.add(e.key);
+  handleStroke(e.key);
+});
+
+window.addEventListener("keyup", (e) => {
+  held_keys.delete(e.key);
 });
 
 window.addEventListener("wheel", (e) => {
