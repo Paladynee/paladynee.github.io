@@ -166,14 +166,26 @@ function clampLum({ h, s, v }, min, max) {
 }
 
 function styleStringToRgb(str) {
-  if (!str.startsWith("rgb(")) {
+  if (str.length < 10 || str.length > 16 || str.substring(0, 4) !== "rgb(") {
     return str;
   }
 
-  // console.log(str);
+  let comma1 = str.indexOf(",");
+  let comma2 = str.indexOf(",", comma1 + 1);
 
-  const values = str.match(/\d+/g).map(Number);
-  return { r: values[0], g: values[1], b: values[2] };
+  if (comma1 === -1 || comma2 === -1) {
+    return str;
+  }
+
+  const r = parseInt(str.substring(4, comma1));
+  const g = parseInt(str.substring(comma1 + 1, comma2));
+  const b = parseInt(str.substring(comma2 + 1, str.length - 1));
+
+  if (isNaN(r) || isNaN(g) || isNaN(b)) {
+    return str;
+  }
+
+  return { r, g, b };
 }
 
 function initObjects(objamount = 100) {
@@ -458,4 +470,14 @@ function handleContinuousStrokes(key_list) {
 
 function boundary_check(vec, tl, br) {
   return vec.x < tl.x || vec.x > br.x || vec.y < tl.y || vec.y > br.y;
+}
+
+function find_closest() {
+  let closest = objects[0];
+  objects.forEach((obj) => {
+    if (mousePos.to(closest.pos).mag() > mousePos.to(obj.pos)) {
+      closest = obj;
+    }
+  });
+  return closest;
 }

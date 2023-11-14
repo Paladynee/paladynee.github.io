@@ -138,6 +138,8 @@ function draw() {
       Math.sqrt(diff.mag() * 10)
     );
 
+    if (result.length > 100) break;
+
     for (const [pred, succ, start, end] of result) {
       ctx.beginPath();
       ctx.lineWidth = 5;
@@ -201,7 +203,7 @@ let obliterated = false;
 let mouse_prevent = false;
 let line_offset = 0;
 let hashnet_size = 18;
-let objectAmount = 333;
+let objectAmount = 100;
 let objects = initObjects(objectAmount);
 let timeDilation = 3;
 let paletteHue = random(0, 360);

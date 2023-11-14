@@ -263,6 +263,15 @@ class Rigid {
       signedLerp(this.size.x * min, this.size.x * max, sinx),
       signedLerp(this.size.y * min, this.size.y * max, sinx)
     );
+    let [sh1, sh2, sh3, sh4] = squareAt(
+      this.pos.x,
+      this.pos.y,
+      signedLerp(this.size.x * min, this.size.x * max, sinx) + 10,
+      signedLerp(this.size.y * min, this.size.y * max, sinx) + 10
+    );
+    this.ctx.fillStyle = "#00000030";
+    this.ctx.fillRect(sh1, sh2, sh3, sh4);
+    this.ctx.fillstyle = "#ffffffff";
     this.ctx.fillStyle = rgbToStyleString(
       hsvToRgb(
         clampLum(rotHue(rgbToHsv(styleStringToRgb(final_str)), 270), 0.4, 0.6)
