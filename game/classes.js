@@ -1,5 +1,3 @@
-/** @format */
-
 class Vec2D {
   constructor(x = 0, y = 0) {
     this.x = x;
@@ -93,6 +91,61 @@ class Vec2D {
   }
 
   /**
+   * @param {number} amount
+   */
+  divide(amount) {
+    /** @type {Vec2D[][]} */
+    const vec_tuple_array = [];
+
+    const direc = this.normalize();
+    const magnitude = this.mag();
+
+    const unit = direc.scale(magnitude / amount);
+
+    for (let i = 0; i < amount; i++) {
+      const start = unit.scale(i);
+      const end = start.add(unit);
+
+      vec_tuple_array.push([start, end]);
+    }
+
+    return vec_tuple_array;
+  }
+
+  /**
+   * @param {number} amount
+   * @param {number} randomization_factor
+   */
+  divide_rand(amount, randomization_factor) {
+    /** @type {Vec2D[][]} */
+    const vec_tuple_array = [];
+
+    const direction = this.normalize();
+    const magnitude = this.mag();
+
+    const unit = direction.scale(magnitude / amount);
+
+    for (let i = 0; i < amount; i++) {
+      const actual_start = i === 0 ? new Vec2D() : unit.scale(i);
+      const actual_end = actual_start.add(unit);
+
+      const rand_start = i === 0 ? actual_start : vec_tuple_array[i - 1][3];
+      const rand_end =
+        i === amount - 1
+          ? actual_end
+          : actual_end.add(
+              direction
+                .rotate(Math.PI / 2)
+                .scale(random(-1, 1) * randomization_factor)
+            );
+
+      vec_tuple_array.push([actual_start, actual_end, rand_start, rand_end]);
+    }
+
+    return vec_tuple_array;
+  }
+
+  /**
    * @param {number} angle
    */
   rotate(angle) {
@@ -145,11 +198,21 @@ class Rigid {
     this.friction = friction;
   }
 
-  update(dt, time) {
-    this.physics(dt);
-    if (clamping_behavior) this.border();
+  update(dt, time, timeDilation, obliterated) {
+    if (!obliterated) this.handle_ticks(dt, timeDilation);
     this.outline(time);
     this.draw(time);
+  }
+
+  handle_ticks(dt, timeDilation) {
+    let threshold = 1 / 4096;
+    while (dt > threshold) {
+      this.physics_calc(threshold / timeDilation);
+      if (clamping_behavior) this.border();
+      dt -= threshold;
+    }
+
+    this.physics_calc(threshold);
   }
 
   draw(time) {
@@ -167,6 +230,18 @@ class Rigid {
       this.size.x,
       this.size.y
     );
+
+    let direction = this.vel.normalize();
+    let mag = this.vel.mag();
+    let trail_vec = direction.scale(-mag / Math.sqrt(1000));
+
+    this.ctx.beginPath();
+    this.ctx.strokeStyle = final_str;
+    this.ctx.lineWidth = this.size.mag() / Math.SQRT2;
+    this.ctx.moveTo(this.pos.x, this.pos.y);
+    this.ctx.lineTo(this.pos.x + trail_vec.x, this.pos.y + trail_vec.y);
+    this.ctx.stroke();
+
     this.ctx.fillRect(x, y, sizex, sizey);
   }
 
@@ -193,11 +268,13 @@ class Rigid {
         clampLum(rotHue(rgbToHsv(styleStringToRgb(final_str)), 270), 0.4, 0.6)
       )
     );
+    this.ctx.shadowBlur = 10;
+    this.ctx.shadowColor = "#000000";
     this.ctx.fillRect(one, two, three, four);
+    this.ctx.shadowBlur = 0;
   }
 
-  physics(dt) {
-    // first acc, then vel, then pos
+  physics_calc(dt) {
     this.acc.set(
       this.pos
         .oneOverDistanceSquared(
@@ -205,15 +282,15 @@ class Rigid {
           new Vec2D(1 / this.parentCanvas.width, 1 / this.parentCanvas.width)
         )
         .scale(1000)
-      // this.pos
-      //   .to(this.target)
-      //   .mult1D(10)
-      //   .add(new Vec2D(random(-5000, 5000), random(-5000, 5000)))
-      //   .add(this.pos.to(this.target).normalize().mult1D(5000))
     );
     this.vel.set(this.vel.add(this.acc.scale(dt)));
     this.vel.set(this.vel.scale(this.friction ** dt));
     this.pos.set(this.pos.add(this.vel.scale(dt)));
+    // this.pos
+    //   .to(this.target)
+    //   .mult1D(10)
+    //   .add(new Vec2D(random(-5000, 5000), random(-5000, 5000)))
+    //   .add(this.pos.to(this.target).normalize().mult1D(5000))
   }
 
   border() {

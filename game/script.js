@@ -33,7 +33,7 @@ function draw() {
   let dt = (now - time) / 1000;
   time = now;
 
-  getMouseVel(mousePos, dt);
+  // getMouseVel(mousePos, dt);
 
   if (dt > 0.1) dt = 0.1;
   if (dt <= 0) dt = 0.001;
@@ -65,11 +65,10 @@ function draw() {
     ctx.stroke();
   }
 
-  dt /= timeDilation;
-  line_offset = (line_offset + 0.5 + dt * 100) % grid_divisor;
+  if (!obliterated) line_offset = (line_offset + 0.5 + dt * 100) % grid_divisor;
 
   for (let i = 0; i < objects.length; i++) {
-    objects[i].update(dt, time);
+    objects[i].update(dt, time, timeDilation, obliterated);
   }
 
   // draw a line to the closest fucking thing(s)
@@ -77,7 +76,6 @@ function draw() {
   let nearmap = objects.sort(
     (a, b) => a.pos.to(mousePos).mag() - b.pos.to(mousePos).mag()
   );
-  // sortColors();
 
   let near_hashnet = nearmap.slice(0, hashnet_size);
 
@@ -104,8 +102,8 @@ function draw() {
   let next = 0;
   for (let i = 0; i < lines.length; i++) {
     let [from, to] = lines[i];
-    ctx.strokeStyle = palette[next];
     ctx.beginPath();
+    ctx.strokeStyle = palette[next];
     ctx.moveTo(from[0], from[1]);
     ctx.lineTo(to[0], to[1]);
     ctx.stroke();
@@ -131,6 +129,52 @@ function draw() {
     next = (next + 1) % palette.length;
   }
 
+  let subject = nearmap.reverse()[0];
+  let line_length = 100;
+  let diff = mousePos.to(subject.pos);
+  for (let lasers = 0; lasers < 5; lasers++) {
+    let result = diff.divide_rand(
+      ~~(diff.mag() / line_length) + 2,
+      Math.sqrt(diff.mag() * 10)
+    );
+
+    for (const [pred, succ, start, end] of result) {
+      ctx.beginPath();
+      ctx.lineWidth = 5;
+      ctx.strokeStyle = "#000000";
+      ctx.moveTo(mousePos.x + start.x, mousePos.y + start.y);
+      ctx.lineTo(mousePos.x + end.x, mousePos.y + end.y);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = "#40ff40";
+      ctx.moveTo(mousePos.x + pred.x, mousePos.y + pred.y);
+      ctx.lineTo(mousePos.x + succ.x, mousePos.y + succ.y);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.fillStyle = "#ff0000";
+      ctx.arc(
+        mousePos.x + pred.x,
+        mousePos.y + pred.y,
+        2,
+        0,
+        2 * Math.PI,
+        false
+      );
+      ctx.fill();
+    }
+
+    for (const [pred, succ, start, end] of result) {
+      ctx.beginPath();
+      ctx.fillStyle = "#444";
+      ctx.arc(mousePos.x + end.x, mousePos.y + end.y, 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  nearmap.reverse();
+
   requestAnimationFrame(draw);
 }
 
@@ -148,14 +192,16 @@ window.addEventListener("resize", resize);
 let lastColor = 0;
 let mousePos = new Vec2D(can.width / 2, can.height / 2);
 window.addEventListener("mousemove", (e) => {
-  mousePos.set(new Vec2D(e.clientX, e.clientY));
+  if (!mouse_prevent) mousePos.set(new Vec2D(e.clientX, e.clientY));
 });
 let last_mousePos = [];
 
 let helpmenu = true;
+let obliterated = false;
+let mouse_prevent = false;
 let line_offset = 0;
 let hashnet_size = 18;
-let objectAmount = 100;
+let objectAmount = 333;
 let objects = initObjects(objectAmount);
 let timeDilation = 3;
 let paletteHue = random(0, 360);
@@ -179,6 +225,9 @@ window.addEventListener("mousedown", (e) => {
     for (let i = 0; i < objects.length; i++) {
       let dist = objects[i].pos.from(objects[i].target).mag();
       let direction = objects[i].pos.from(objects[i].target).normalize();
+      if (direction.mag() === 0) {
+        direction = new Vec2D(1, 0).rotate(random(0, Math.PI * 2));
+      }
       let pow = 1000000 / (dist + 100) / 2;
       objects[i].vel.set(objects[i].vel.add(direction.scale(pow)));
     }
@@ -198,10 +247,11 @@ window.addEventListener("contextmenu", (e) => {
 
 window.addEventListener("keydown", (e) => {
   held_keys.add(e.key);
-  handleStroke(e.key);
+  handleStroke(e);
 });
 
 window.addEventListener("keyup", (e) => {
+  e.preventDefault();
   held_keys.delete(e.key);
 });
 

@@ -235,7 +235,26 @@ function resetColors() {
     .map(rgbToStyleString);
 }
 
-function handleStroke(key) {
+function handleStroke(event) {
+  let key = event.key;
+  let prevent_keys = [
+    "+",
+    "-",
+    "Tab",
+    "Escape",
+    "z",
+    "Z",
+    "q",
+    "Q",
+    "x",
+    "X",
+    "r",
+    "R",
+    "0",
+    "5",
+  ];
+
+  if (prevent_keys.includes(key)) event.preventDefault();
   switch (key) {
     case "+":
       hashnet_size += 3;
@@ -245,14 +264,17 @@ function handleStroke(key) {
       hashnet_size -= 3;
       if (hashnet_size < 0) hashnet_size = 0;
       break;
-    case "Escape":
+    case "Tab":
       helpmenu
         ? (document.querySelector(".info").style = "display: none")
         : (document.querySelector(".info").style = "display: block");
       helpmenu = !helpmenu;
       break;
-    case "z":
-    case "Z":
+    case "Escape":
+      obliterated = !obliterated;
+      break;
+    case "x":
+    case "X":
       objects.forEach((obj) => {
         let remainder = 1 - obj.friction;
         if (remainder >= 1 || remainder <= 0) {
@@ -268,8 +290,8 @@ function handleStroke(key) {
         obj.friction = 0.5;
       });
       break;
-    case "x":
-    case "X":
+    case "z":
+    case "Z":
       objects.forEach((obj) => {
         let remainder = 1 - obj.friction;
         if (obj.friction <= 3 / 4) {
@@ -282,6 +304,9 @@ function handleStroke(key) {
           obj.friction = 0.5;
         }
       });
+      break;
+    case "5":
+      mouse_prevent = !mouse_prevent;
       break;
     case "r":
     case "R":
@@ -301,6 +326,7 @@ function handleStroke(key) {
 function handleContinuousStrokes(key_list) {
   let movement_strength = 10;
   for (const key of key_list) {
+    // console.log(key);
     switch (key) {
       case "a":
       case "A":
@@ -392,9 +418,44 @@ function handleContinuousStrokes(key_list) {
           );
         });
         break;
+      case "e":
+      case "E":
+        let shift_vector = objects
+          .reduce((acc, val) => acc.add(val.pos), new Vec2D())
+          .scale(1 / objects.length)
+          .to(mousePos);
+
+        objects.forEach((obj) => {
+          obj.pos.set(obj.pos.add(shift_vector));
+        });
+        break;
+
+      case "u":
+      case "U":
+        const radius = 100;
+        let relative_circle_vec = new Vec2D(0, radius);
+        let angle = (Math.PI * 2) / objects.length;
+
+        const new_objects = [];
+
+        for (let i in objects) {
+          let obj = objects[i];
+          obj.pos.set(mousePos.add(relative_circle_vec));
+          obj.vel.set(obj.pos.to(mousePos).rotate(90).scale(10));
+          relative_circle_vec.set(relative_circle_vec.rotate(angle));
+          new_objects.push(obj);
+        }
+
+        objects = new_objects;
+
+        break;
 
       default:
         break;
     }
   }
+}
+
+function boundary_check(vec, tl, br) {
+  return vec.x < tl.x || vec.x > br.x || vec.y < tl.y || vec.y > br.y;
 }
