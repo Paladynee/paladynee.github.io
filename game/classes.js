@@ -268,10 +268,10 @@ class Rigid {
         clampLum(rotHue(rgbToHsv(styleStringToRgb(final_str)), 270), 0.4, 0.6)
       )
     );
-    this.ctx.shadowBlur = 10;
-    this.ctx.shadowColor = "#000000";
+    // this.ctx.shadowBlur = 10;
+    // this.ctx.shadowColor = "#000000";
     this.ctx.fillRect(one, two, three, four);
-    this.ctx.shadowBlur = 0;
+    // this.ctx.shadowBlur = 0;
   }
 
   physics_calc(dt) {
