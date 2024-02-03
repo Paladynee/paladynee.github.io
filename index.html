@@ -1,51 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="script.js" defer></script>
-    <link rel="stylesheet" href="styles.css" />
-    <title>Paladynee</title>
-  </head>
-  <body>
-    <img src="lowres_thing_lol.jpg" alt="bruh" class="bg">
-    <div id="wrapper">
-      <p id="display">_</p>
-    </div>
-    <div id="outer">
-      <pre class="nomarg">my games:</pre>
-      <div id="games">
-        <a href="/modular_fizz/index.html">
-          <div id="modular_fizz">
-            <img
-              class="preview_image"
-              src="fizzbuzz_preview.png"
-              alt="FizzBuzz"
-            />
-            <b class="title">FizzBuzz</b>
-          </div>
-        </a>
-        <a href="/incremental/index.html">
-          <div id="incremental">
-            <img
-            class="preview_image"
-            src="incremental_preview.png"
-            alt="Incremental Game"
-            />
-            <b class="title">Incremental Game</b>
-          </div>
-        </a>
-        <a href="/game/index.html">
-          <div id="hashnet">
-            <img
-              class="preview_image"
-              src="hashnet_preview.png"
-              alt="HashNet Simulator"
-            />
-            <b class="title">HashNet Simulator</b>
-          </div>
-        </a>
-      </div>
-    </div>
-  </body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <script src="script.js" defer></script>
+        <link rel="stylesheet" href="styles.css" />
+        <title>&mut Paladynee | viscious amalgamation of abnormality in the entropy of the grand asset</title>
+    </head>
+    <body>
+        <!-- bad code ahead ... s-->
+        <script>
+            // i currently have 8 random backgrounds for my website
+            const img = document.createElement("img");
+            const random_index = Math.floor(Math.random() * 8);
+            img.alt = "bruh";
+            // do not try to index more than 8 or you will be punished 😈
+            img.src = `./backgrounds/img (${random_index + 1}).jpg`;
+            img.classList.add("bg");
+            document.body.appendChild(img);
+        </script>
+        <div id="wrapper">
+            <p id="display">_</p>
+        </div>
+        <div id="outer">
+            <pre class="nomarg">my games:</pre>
+            <div id="games">
+                <a href="./modular_fizz/index.html">
+                    <div id="modular_fizz" class="box">
+                        <img class="preview_image" src="./fizzbuzz_preview.png" alt="FizzBuzz" />
+                        <b class="title">FizzBuzz</b>
+                    </div>
+                </a>
+
+                <a href="./incremental/index.html">
+                    <div id="incremental" class="box">
+                        <img class="preview_image" src="./incremental_preview.png" alt="Incremental Game" />
+                        <b class="title">Incremental Game</b>
+                    </div>
+                </a>
+                <a href="./hashnet/index.html">
+                    <div id="hashnet" class="box">
+                        <img class="preview_image" src="./hashnet_preview.png" alt="HashNet Simulator" />
+                        <b class="title">HashNet Simulator</b>
+                    </div>
+                </a>
+                <a href="./webgl/index.html">
+                    <div id="webgl" class="box">
+                        <img class="preview_image" src="./webgl_preview.png" alt="WebGL 3D Teapot" />
+                        <b class="title">3D Teapot</b>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </body>
 </html>

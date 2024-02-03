@@ -1,0 +1,27 @@
+body {
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+}
+
+#canvas {
+    display: block;
+    margin: 0 auto;
+    background-color: #f0f0f0;
+}
+
+.info {
+    position: fixed;
+    top: 8px;
+    left: 8px;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    user-select: none;
+    pointer-events: none;
+    color: black;
+    font-family: 'Courier New', Courier, monospace;
+    background: rgba(0, 0, 0, 0);
+  }
+  
