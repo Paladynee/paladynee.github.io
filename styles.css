@@ -1,9 +1,16 @@
-/* bad code ahead ... */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-#wrapper {
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
+:root {
+    --window_color: #554920;
+    --window_border_color: #645934;
+    --window_accent: #665c37;
+    --window_close_button: #e81123;
+    --terminal-black: #0c0c0c;
+    --terminal-white: #f3f3f3;
 }
 
 @font-face {
@@ -11,9 +18,33 @@
     src: url("JetBrainsMono-Thin.woff2") format("woff2");
 }
 
+@font-face {
+    font-family: "WindowsIcons";
+    src: url("segoe-mdl2-assets.ttf") format("truetype");
+}
+
 body {
     margin: 8px 8px 0 8px;
     background-color: black;
+    overflow: hidden;
+}
+
+#wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
+
+#outer {
+    padding: 5px;
+    background-color: #303040;
+    border: 5px outset #606080;
+    min-width: 80vw;
+    max-width: 100vw;
+    position: fixed;
+    bottom: 5px;
+    left: 5px;
+    box-shadow: 0px 0px 5px black;
 }
 
 #display {
@@ -41,25 +72,6 @@ body {
     border: 5px outset #606080;
 }
 
-#outer {
-    padding: 5px;
-    background-color: #303040;
-    border: 5px outset #606080;
-    min-width: 80vw;
-    max-width: 100vw;
-    position: fixed;
-    bottom: 5px;
-    left: 5px;
-    box-shadow: 0px 0px 5px black;
-}
-
-.nomarg {
-    margin: 0 0 16px 0;
-    color: white;
-    font-weight: bold;
-    font-size: 1.5rem;
-}
-
 a {
     text-decoration: none;
 }
@@ -84,5 +96,150 @@ a {
     max-height: 100vh;
     image-rendering: crisp-edges;
     filter: blur(8px);
-    /* border-image-repeat: repeat; */
+}
+
+.segoe {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+    font-size: 12px;
+    color: white;
+}
+
+.consolas {
+    font-family: Consolas, monospace;
+    font-size: 16px;
+    color: white;
+}
+
+.windowsiconfont {
+    font-family: "WindowsIcons";
+    font-size: 10px;
+    color: white;
+}
+
+.windowsiconfont_altsize {
+    font-size: 10px !important;
+}
+
+#term {
+    z-index: 99999;
+    position: absolute;
+    background-color: var(--window_color);
+    border: 1px solid var(--window_border_color);
+    margin: 100 233;
+    width: round(60vw, 1px);
+    min-width: 400px;
+    box-shadow: 2px 2px 12px #00000080;
+}
+
+#term_header {
+    background-color: var(--window_color);
+    padding: 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: left;
+    align-items: center;
+    height: 30px;
+}
+
+#term_header_icon {
+    width: 30px;
+    min-width: 30px;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#term_header_title {
+    width: 1300px;
+    align-self: flex-start;
+    display: flex;
+    justify-content: left;
+    align-items: center;
+    height: 30px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: white;
+}
+
+#term_header_buttons {
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: right;
+    align-items: center;
+    perspective: 0;
+}
+
+.term_header_button_wrapper {
+    margin-left: 1px;
+    height: 100%;
+    width: 45px;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 12px;
+}
+
+.term_header_button_wrapper_close {
+    margin-left: 1px;
+    height: 100%;
+    width: 45px;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.term_header_button_wrapper,
+.term_header_button_wrapper_close {
+    transition: background-color 0.2s ease;
+}
+
+.term_header_button_wrapper:hover {
+    background-color: var(--window_accent);
+}
+
+.term_header_button_wrapper_close:hover {
+    background-color: var(--window_close_button);
+}
+
+#term_display {
+    height: 300px;
+}
+
+#term_display_textbox {
+    background-color: var(--terminal-black);
+    color: var(--terminal-white);
+    font-family: JetBrains;
+    border: none;
+    width: 100%;
+    height: 100%;
+    padding: 0px;
+    resize: none;
+    outline: none;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+#term_display_textbox::selection {
+    background-color: var(--terminal-white);
+    color: var(--terminal-black);
+}
+
+.noselect {
+    user-select: none;
+}
+
+.nopointer {
+    pointer-events: none;
+}
+
+.nomarg {
+    margin: 0 0 16px 0;
+    color: white;
+    font-weight: bold;
+    font-size: 1.5rem;
 }

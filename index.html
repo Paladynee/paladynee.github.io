@@ -19,8 +19,35 @@
             img.classList.add("bg");
             document.body.appendChild(img);
         </script>
-        <div id="wrapper">
-            <p id="display">_</p>
+
+        <div id="term" style="display: none">
+            <div id="term_header">
+                <div id="term_header_icon" class="noselect nopointer">
+                    <img src="./cmd.ico" alt="icon" />
+                </div>
+                <div id="term_header_title">
+                    <span class="segoe noselect"> Command Prompt (C:\Users\Paladynee\Desktop\development\paladynee.github.io\) </span>
+                </div>
+                <div id="term_header_buttons">
+                    <div class="term_header_button_wrapper noselect windowsiconfont windowsiconfont_altsize">
+                        <div id="term_header_buttons_minimize"></div>
+                    </div>
+                    <div class="term_header_button_wrapper noselect windowsiconfont windowsiconfont_altsize">
+                        <div id="term_header_buttons_maximize"></div>
+                    </div>
+                    <div id="term_header_buttons_close_hitbox" class="term_header_button_wrapper_close noselect windowsiconfont">
+                        <div id="term_header_buttons_close"></div>
+                    </div>
+                </div>
+            </div>
+            <div id="term_display">
+                <pre id="term_display_textbox" class="consolas">
+Microsoft Windows [Version 10.0.19045.5011]
+(c) Microsoft Corporation. All rights reserved.
+
+C:\Users\Paladynee\Desktop\development\paladynee.github.io\></pre
+                >
+            </div>
         </div>
         <div id="outer">
             <pre class="nomarg">my games:</pre>
