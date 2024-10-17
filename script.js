@@ -127,7 +127,8 @@ close_button.addEventListener("click", () => {
 });
 
 term.style.top = `${randInt(0, Math.max(window.innerHeight - 600, 0))}px`;
-term.style.left = `${randInt(0, Math.max(window.innerWidth - 800, 0))}px`;
+let vw60 = window.innerWidth * 0.6;
+term.style.left = `${randInt(0, Math.max(window.innerWidth - vw60, 0))}px`;
 term.style.display = "block";
 
 function randInt(min, max) {
