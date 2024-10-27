@@ -1,0 +1,15 @@
+{
+  "name": "hashnet_lib",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "hashnet_lib_bg.wasm",
+    "hashnet_lib.js",
+    "hashnet_lib.d.ts"
+  ],
+  "main": "hashnet_lib.js",
+  "types": "hashnet_lib.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}
