@@ -1,0 +1,28 @@
+[package]
+edition = "2021"
+name = "hashnet_lib"
+version = "0.1.0"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+ahash = { version = "0.8.11", features = ["compile-time-rng"] }
+getrandom = { version = "0.2", features = ["js"] }
+js-sys = "0.3.72"
+log = "0.4.22"
+rand = "0.8.5"
+regex = "1.11.1"
+wasm-bindgen = "0.2.95"
+wasm-bindgen-console-logger = "0.1.1"
+web-sys = { version = "0.3.72", features = [
+    'Performance',
+    'PerformanceTiming',
+    'Window',
+] }
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = 3
+strip = true
