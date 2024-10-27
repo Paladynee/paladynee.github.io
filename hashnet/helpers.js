@@ -230,7 +230,7 @@ function sortColors() {
 }
 
 function resetColors() {
-  let newPalette = generateHsvLumPalette(100, 1, (Math.random() * 360) % 360);
+  let newPalette = generateHsvLumPalette(objectAmount, 1, (Math.random() * 360) % 360);
   objects.map((obj, i) => {
     obj.style = rgbToStyleString(hsvToRgb(newPalette[i]));
   });

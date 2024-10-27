@@ -95,7 +95,7 @@ a {
     min-height: 100vh;
     max-height: 100vh;
     image-rendering: crisp-edges;
-    filter: blur(8px);
+    /* filter: blur(8px); */
 }
 
 .segoe {
