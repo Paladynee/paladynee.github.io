@@ -1,0 +1,156 @@
+body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #181a20;
+    color: #eaeaea;
+}
+#mainTextbox {
+    width: 96vw;
+    height: 3em;
+    font-size: 1.5em;
+    border: none;
+    outline: none;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+    border-radius: 8px;
+    margin-bottom: 3vh;
+    caret-color: #eaeaea; /* Show text cursor in terminal color */
+    background: #181a20; /* Match terminal background */
+    color: #eaeaea;
+    padding: 0 1em;
+    font-family: "Fira Mono", "Consolas", "Menlo", "Monaco", "Courier New", monospace; /* Terminal font */
+    letter-spacing: 0.03em;
+    border: 2px solid #23262f; /* Subtle border for terminal look */
+}
+
+kbd {
+    font: inherit;
+    background: rgba(127, 127, 127, 0.12);
+    border: 1px solid rgba(127, 127, 127, 0.2);
+    border-bottom-width: 2px;
+    padding: 0.15em 0.35em;
+    border-radius: 6px;
+}
+
+.toast-container {
+    position: fixed;
+    top: 2.5vh;
+    right: 2vw;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    align-items: flex-end;
+}
+
+li kbd {
+    display: inline-block;
+}
+
+.toast {
+    display: flex;
+    align-items: center;
+    min-width: 260px;
+    max-width: 450px;
+    background: #23262f;
+    color: #eaeaea;
+    border-radius: 10px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+    padding: 1em 1.2em 1em 0.8em;
+    opacity: 0;
+    transform: translateY(-30px);
+    transition: opacity 0.3s, transform 0.3s;
+    font-family: "Segoe UI", "Arial", sans-serif;
+    position: relative;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.toast-img {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+    margin-right: 0.9em;
+    border-radius: 6px;
+    background: #181a20;
+}
+
+.toast-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2em;
+}
+
+.toast-title {
+    font-weight: 600;
+    font-size: 1.08em;
+    margin-bottom: 0.1em;
+}
+
+.toast-message {
+    font-size: 0.98em;
+    opacity: 0.85;
+}
+
+.toast-close {
+    background: none;
+    border: none;
+    color: #eaeaea;
+    font-size: 1.3em;
+    cursor: pointer;
+    margin-left: 0.7em;
+    margin-right: -0.2em;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+.toast-close:hover {
+    opacity: 1;
+}
+
+.stdout-container {
+    flex: 1;                /* take up all remaining space */
+    display: flex;
+    flex-direction: column;
+    padding: 1em;
+    overflow-y: auto;
+    font-family: "Fira Mono", "Consolas", "Menlo", "Monaco", "Courier New", monospace;
+    font-size: 1.05em;
+    line-height: 1.4em;
+    color: #eaeaea;
+    background: #181a20;
+    scrollbar-width: thin;
+    scrollbar-color: #444 #181a20;
+}
+
+.textbox-container {
+    flex: 0;                /* only use the height it needs */
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    background: #181a20;
+    border-top: 2px solid #23262f;
+    box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.25);
+    padding-bottom: 2vh;
+}
+
+/* Custom scrollbar (Chrome/Edge/Safari) */
+.stdout-container::-webkit-scrollbar {
+    width: 6px;
+}
+.stdout-container::-webkit-scrollbar-track {
+    background: #181a20;
+}
+.stdout-container::-webkit-scrollbar-thumb {
+    background: #444;
+    border-radius: 4px;
+}
+
+.stdout-line {
+    white-space: pre-wrap; /* preserve spacing */
+    word-wrap: break-word;
+}
