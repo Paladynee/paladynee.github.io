@@ -27,10 +27,6 @@ pub struct SoaGameObjects {
     pub vxs: [f32; GAME_OBJECTS_AMT],
     /// Vertical velocities of all particles.
     pub vys: [f32; GAME_OBJECTS_AMT],
-    /// Horizontal accelerations of all particles.
-    pub axs: [f32; GAME_OBJECTS_AMT],
-    /// Vertical accelerations of all particles.
-    pub ays: [f32; GAME_OBJECTS_AMT],
     /// Red color components of all particles.
     pub crs: [u8; GAME_OBJECTS_AMT],
     /// Green color components of all particles.
@@ -49,10 +45,6 @@ pub struct GameObject {
     pub vx: f32,
     /// The vertical velocity.
     pub vy: f32,
-    /// The horizontal acceleration.
-    pub ax: f32,
-    /// The vertical acceleration.
-    pub ay: f32,
     /// The red color channel.
     pub cr: u8,
     /// The green color channel.
@@ -131,8 +123,6 @@ impl SoaGameObjects {
                 ys = 0.0,
                 vxs = 0.0,
                 vys = 0.0,
-                axs = 0.0,
-                ays = 0.0,
                 crs = 255,
                 cgs = 255,
                 cbs = 255
@@ -206,8 +196,6 @@ impl SoaGameObjects {
             Self::soa_field_swap(&mut self.ys, i, j);
             Self::soa_field_swap(&mut self.vxs, i, j);
             Self::soa_field_swap(&mut self.vys, i, j);
-            Self::soa_field_swap(&mut self.axs, i, j);
-            Self::soa_field_swap(&mut self.ays, i, j);
             Self::soa_field_swap(&mut self.crs, i, j);
             Self::soa_field_swap(&mut self.cgs, i, j);
             Self::soa_field_swap(&mut self.cbs, i, j);
@@ -251,8 +239,6 @@ impl SoaGameObjects {
                 y: *self.ys.get_unchecked(i),
                 vx: *self.vxs.get_unchecked(i),
                 vy: *self.vys.get_unchecked(i),
-                ax: *self.axs.get_unchecked(i),
-                ay: *self.ays.get_unchecked(i),
                 cr: *self.crs.get_unchecked(i),
                 cg: *self.cgs.get_unchecked(i),
                 cb: *self.cbs.get_unchecked(i),
@@ -273,8 +259,6 @@ impl SoaGameObjects {
             y,
             vx,
             vy,
-            ax,
-            ay,
             cr,
             cg,
             cb,
@@ -286,8 +270,6 @@ impl SoaGameObjects {
             *self.ys.get_unchecked_mut(i) = y;
             *self.vxs.get_unchecked_mut(i) = vx;
             *self.vys.get_unchecked_mut(i) = vy;
-            *self.axs.get_unchecked_mut(i) = ax;
-            *self.ays.get_unchecked_mut(i) = ay;
             *self.crs.get_unchecked_mut(i) = cr;
             *self.cgs.get_unchecked_mut(i) = cg;
             *self.cbs.get_unchecked_mut(i) = cb;

@@ -8,6 +8,9 @@ use core::arch::wasm32::f32x4_replace_lane;
 use core::arch::wasm32::f32x4_splat;
 use core::arch::wasm32::f32x4_sub;
 use core::arch::wasm32::i32x4_shuffle;
+use core::arch::wasm32::u32x4_shr;
+use core::arch::wasm32::u32x4_splat;
+use core::arch::wasm32::u32x4_sub;
 use core::arch::wasm32::v128;
 use core::f32;
 use core::f32::consts::FRAC_PI_2 as HALF_PI;
@@ -22,6 +25,41 @@ const C1: f32 = -0.166_666_67;
 const C2: f32 =  0.008_333_331;
 const C3: f32 = -0.000_198_409;
 const C4: f32 =  0.000_002_752_6;
+
+const FAST_RECIP_MAGIC: u32 = 0x7ef3_11c2;
+const FAST_RSQRT_MAGIC: u32 = 0x5f37_59df;
+
+#[inline(always)]
+pub fn fast_recipf(x: f32) -> f32 {
+    let mut y = f32::from_bits(FAST_RECIP_MAGIC.wrapping_sub(x.to_bits()));
+    // y *= 2.0 - x * y;
+    y
+}
+
+#[inline(always)]
+pub fn fast_rsqrtf(x: f32) -> f32 {
+    let x_half = 0.5 * x;
+    let mut y = f32::from_bits(FAST_RSQRT_MAGIC.wrapping_sub(x.to_bits() >> 1));
+    // y *= 1.5 - x_half * y * y;
+    y
+}
+
+#[inline(always)]
+pub fn fast_recip4(x: v128) -> v128 {
+    let mut y = u32x4_sub(u32x4_splat(FAST_RECIP_MAGIC), x);
+    // y = f32x4_mul(y, f32x4_sub(f32x4_splat(2.0), f32x4_mul(x, y)));
+    y
+}
+
+#[inline(always)]
+pub fn fast_rsqrt4(x: v128) -> v128 {
+    // let x_half = f32x4_mul(x, f32x4_splat(0.5));
+    let bits = u32x4_shr(x, 1);
+    let mut y = u32x4_sub(u32x4_splat(FAST_RSQRT_MAGIC), bits);
+    // let y_sq = f32x4_mul(y, y);
+    // y = f32x4_mul(y, f32x4_sub(f32x4_splat(1.5), f32x4_mul(x_half, y_sq)));
+    y
+}
 
 #[inline(always)]
 pub fn sqrtf(x: f32) -> f32 {

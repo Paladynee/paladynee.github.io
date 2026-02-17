@@ -1,11 +1,11 @@
 use crate::exports::GlobalState;
 use crate::exports::Hf;
 use crate::exports::Vec2f;
-use core::arch::wasm32::f32_sqrt;
+use crate::exports::simd_math::fast_recip4;
+use crate::exports::simd_math::fast_recipf;
+use crate::exports::simd_math::fast_rsqrt4;
+use crate::exports::simd_math::fast_rsqrtf;
 use core::arch::wasm32::f32x4_add;
-use core::arch::wasm32::f32x4_convert_i32x4;
-use core::arch::wasm32::f32x4_div;
-use core::arch::wasm32::f32x4_eq;
 use core::arch::wasm32::f32x4_extract_lane;
 use core::arch::wasm32::f32x4_gt;
 use core::arch::wasm32::f32x4_lt;
@@ -13,19 +13,18 @@ use core::arch::wasm32::f32x4_max;
 use core::arch::wasm32::f32x4_min;
 use core::arch::wasm32::f32x4_mul;
 use core::arch::wasm32::f32x4_splat;
-use core::arch::wasm32::f32x4_sqrt;
 use core::arch::wasm32::f32x4_sub;
-use core::arch::wasm32::i32x4_splat;
-use core::arch::wasm32::i32x4_sub;
-use core::arch::wasm32::v128_and;
+use core::arch::wasm32::v128_bitselect;
 use core::arch::wasm32::v128_load;
 use core::arch::wasm32::v128_or;
 use core::arch::wasm32::v128_store;
 use core::hint::assert_unchecked;
 use core::intrinsics::powf32;
 
-const FAST_INVERSE_THING: bool = true;
 pub const USE_MANUAL_SIMD: bool = true;
+const FORCE_SCALE: f32 = 1000.0;
+const FORCE_DIST_BIAS: f32 = 0.1;
+const NORM_EPS: f32 = 1.0e-12;
 
 /// Updates the physical state of all particles for a given time step.
 ///
@@ -89,35 +88,20 @@ unsafe fn update_particle_scalar<const CLAMP: bool>(
     let y = unsafe { gs.game_objects.ys.get_unchecked_mut(i) };
     let vx = unsafe { gs.game_objects.vxs.get_unchecked_mut(i) };
     let vy = unsafe { gs.game_objects.vys.get_unchecked_mut(i) };
-    let ax = unsafe { gs.game_objects.axs.get_unchecked_mut(i) };
-    let ay = unsafe { gs.game_objects.ays.get_unchecked_mut(i) };
 
-    *ax = (mpx - *x) * usx;
-    *ay = (mpy - *y) * usy;
+    let mut ax = (mpx - *x) * usx;
+    let mut ay = (mpy - *y) * usy;
 
-    let mag_sq = *ax * *ax + *ay * *ay;
-    let d = mag_sq + 0.1;
-    let factor = if FAST_INVERSE_THING {
-        let mut y = f32::from_bits(0x7ef311c2u32.wrapping_sub(d.to_bits()));
-        y *= 2.0 - d * y;
-        1000.0 * y
-    } else {
-        1000.0 / d
-    };
+    let mag_sq = ax * ax + ay * ay;
+    let inv_len = fast_rsqrtf(mag_sq + NORM_EPS);
+    let inv_d = fast_recipf(mag_sq + FORCE_DIST_BIAS);
+    let scale = FORCE_SCALE * inv_len * inv_d;
 
-    let is_zero = (mag_sq == 0.0) as u8 as f32;
-    let inv_len = 1.0 / f32_sqrt(mag_sq + is_zero);
-    *ax *= inv_len;
-    *ay *= inv_len;
+    ax *= scale;
+    ay *= scale;
 
-    *ax *= factor;
-    *ay *= factor;
-
-    *vx += *ax * dt;
-    *vy += *ay * dt;
-
-    *vx *= damping;
-    *vy *= damping;
+    *vx = (*vx + ax * dt) * damping;
+    *vy = (*vy + ay * dt) * damping;
 
     *x += *vx * dt;
     *y += *vy * dt;
@@ -149,7 +133,6 @@ fn update_physics_kernel_scalar<const CLAMP: bool>(gs: &mut GlobalState, dt: f32
     }
 }
 
-// #[cfg(target_arch = "wasm32")]
 // #[inline(always)]
 // fn update_physics_kernel_simd<const CLAMP: bool>(gs: &mut GlobalState, dt: f32, damping: f32, sw: f32, sh: f32) {
 //     let Vec2f { x: mpx, y: mpy } = gs.mouse_position;
@@ -266,8 +249,6 @@ fn update_physics_kernel_simd<const CLAMP: bool>(gs: &mut GlobalState, dt: f32, 
         let ys_ptr = gs.game_objects.ys.as_mut_ptr();
         let vxs_ptr = gs.game_objects.vxs.as_mut_ptr();
         let vys_ptr = gs.game_objects.vys.as_mut_ptr();
-        let axs_ptr = gs.game_objects.axs.as_mut_ptr();
-        let ays_ptr = gs.game_objects.ays.as_mut_ptr();
 
         let mpxv = f32x4_splat(mpx);
         let mpyv = f32x4_splat(mpy);
@@ -281,11 +262,9 @@ fn update_physics_kernel_simd<const CLAMP: bool>(gs: &mut GlobalState, dt: f32, 
         let zero = f32x4_splat(0.0);
         let one = f32x4_splat(1.0);
         let neg_one = f32x4_splat(-1.0);
-        let two = f32x4_splat(2.0);
-        let point_one = f32x4_splat(0.1);
-        let thousand = f32x4_splat(1000.0);
-
-        let inv_const_bits = i32x4_splat(0x7ef311c2u32 as i32);
+        let point_one = f32x4_splat(FORCE_DIST_BIAS);
+        let force_scale = f32x4_splat(FORCE_SCALE);
+        let norm_eps = f32x4_splat(NORM_EPS);
 
         let mut i = 0usize;
         while i + 4 <= len {
@@ -294,34 +273,16 @@ fn update_physics_kernel_simd<const CLAMP: bool>(gs: &mut GlobalState, dt: f32, 
             let mut vx = v128_load(vxs_ptr.add(i) as *const _);
             let mut vy = v128_load(vys_ptr.add(i) as *const _);
 
-            let mut ax = f32x4_mul(f32x4_sub(mpxv, x), usxv);
-            let mut ay = f32x4_mul(f32x4_sub(mpyv, y), usyv);
+            let ax = f32x4_mul(f32x4_sub(mpxv, x), usxv);
+            let ay = f32x4_mul(f32x4_sub(mpyv, y), usyv);
 
             let mag_sq = f32x4_add(f32x4_mul(ax, ax), f32x4_mul(ay, ay));
-
             let d = f32x4_add(mag_sq, point_one);
-
-            let factor = if FAST_INVERSE_THING {
-                let mut y_approx = i32x4_sub(inv_const_bits, d);
-                let d_times_y = f32x4_mul(d, y_approx);
-                y_approx = f32x4_mul(y_approx, f32x4_sub(two, d_times_y));
-                f32x4_mul(thousand, y_approx)
-            } else {
-                f32x4_div(thousand, d)
-            };
-
-            let is_zero_mask = f32x4_eq(mag_sq, zero);
-
-            let is_zero_val = v128_and(is_zero_mask, one);
-
-            let inv_len = f32x4_div(one, f32x4_sqrt(f32x4_add(mag_sq, is_zero_val)));
-
-            let norm_factor = f32x4_mul(inv_len, factor);
-            ax = f32x4_mul(ax, norm_factor);
-            ay = f32x4_mul(ay, norm_factor);
-
-            v128_store(axs_ptr.add(i) as *mut _, ax);
-            v128_store(ays_ptr.add(i) as *mut _, ay);
+            let inv_d = fast_recip4(d);
+            let inv_len = fast_rsqrt4(f32x4_add(mag_sq, norm_eps));
+            let norm_factor = f32x4_mul(force_scale, f32x4_mul(inv_len, inv_d));
+            let ax = f32x4_mul(ax, norm_factor);
+            let ay = f32x4_mul(ay, norm_factor);
 
             vx = f32x4_mul(f32x4_add(vx, f32x4_mul(ax, dtv)), dampingv);
             vy = f32x4_mul(f32x4_add(vy, f32x4_mul(ay, dtv)), dampingv);
@@ -330,8 +291,6 @@ fn update_physics_kernel_simd<const CLAMP: bool>(gs: &mut GlobalState, dt: f32, 
             let mut new_y = f32x4_add(y, f32x4_mul(vy, dtv));
 
             if CLAMP {
-                use core::arch::wasm32::v128_bitselect;
-
                 let x_oob_mask = v128_or(f32x4_lt(new_x, zero), f32x4_gt(new_x, swv));
                 let y_oob_mask = v128_or(f32x4_lt(new_y, zero), f32x4_gt(new_y, shv));
 
