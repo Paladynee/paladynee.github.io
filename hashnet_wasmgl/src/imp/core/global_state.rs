@@ -13,7 +13,7 @@ use core::hash::Hash;
 use core::ptr;
 
 /// The total number of particle objects in the simulation.
-pub const GAME_OBJECTS_AMT: usize = 1024 * 8;
+pub const GAME_OBJECTS_AMT: usize = 1024 * 32;
 
 /// The central state registry managing simulation parameters and data.
 pub struct GlobalState {

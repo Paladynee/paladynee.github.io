@@ -72,7 +72,7 @@ in vec3 v_color;
 out vec4 frag_color;
 
 void main() {
-    frag_color = vec4(v_color, 1.0);
+    frag_color = vec4(v_color, 0.85);
 }
 `;
 
@@ -150,7 +150,7 @@ function link_program(gl, vert, frag) {
 ///
 /// Returns an object containing the WebGL context and handles to persistent GPU resources.
 function init_webgl(canvas) {
-    const gl = canvas.getContext("webgl2", { antialias: false, alpha: true });
+    const gl = canvas.getContext("webgl2", { antialias: true, alpha: true });
     if (!gl) throw new Error("WebGL2 not supported");
 
     const bg_vert = compile_shader(gl, gl.VERTEX_SHADER, BG_VERT_SRC);
@@ -270,8 +270,9 @@ function init_webgl(canvas) {
     }
 
     gl.bindVertexArray(null);
-    // gl.enable(gl.BLEND);
-    // gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+    gl.enable(gl.BLEND);
+    gl.enable(gl.MULTISAMPLE);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
     gl.clearColor(25 / 255, 23 / 255, 36 / 255, 1.0);
 
