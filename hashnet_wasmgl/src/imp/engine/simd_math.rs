@@ -44,6 +44,7 @@ pub fn fast_rsqrtf(x: f32) -> f32 {
     y
 }
 
+
 #[inline(always)]
 pub fn fast_recip4(x: v128) -> v128 {
     let mut y = u32x4_sub(u32x4_splat(FAST_RECIP_MAGIC), x);
