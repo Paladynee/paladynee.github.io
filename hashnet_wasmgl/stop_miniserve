@@ -1,0 +1,3 @@
+#!/bin/bash
+# Find and kill the miniserve process
+pkill miniserve && echo "miniserve stopped." || echo "miniserve is not running."

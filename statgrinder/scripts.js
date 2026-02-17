@@ -38,6 +38,26 @@ document.addEventListener("keydown", () => {
 
 textbox.addEventListener("keydown", function (e) {
     switch (e.key) {
+        case "Tab":
+            e.preventDefault();
+            const currentValue = textbox.value;
+            const cursorPosition = textbox.selectionStart;
+            const searchterm = currentValue.slice(0, cursorPosition);
+            const possibleCommands = [];
+
+            for (const commandAlias of commandsStore.keys()) {
+                // todo: pursue more advanced autocompletion later.
+                if (commandAlias.startsWith(searchterm)) {
+                    possibleCommands.push(commandAlias);
+                }
+            }
+
+            if (possibleCommands.length === 1) {
+                const completion = possibleCommands[0];
+                textbox.value = completion + currentValue.slice(cursorPosition);
+                textbox.selectionStart = textbox.selectionEnd = completion.length;
+            }
+            break;
         case "Enter":
             handleTerminalInput(textbox.value);
             textbox.value = "";
@@ -85,7 +105,7 @@ textbox.addEventListener("keydown", function (e) {
 });
 
 /**
- * @type {Map<string, {aliases: string[], usages: string[], description: string, exec: (commandString: string) => void}>}
+ * @type {Map<string, {aliases: string[], usages: string[], upgrades?: Upgrade[] description: string, exec: (commandString: string) => void}>}
  */
 export const commandsStore = new Map();
 
@@ -97,14 +117,19 @@ import clear from "./commands/clear.js";
 import save from "./commands/save.js";
 import hard_reset from "./commands/hard_reset.js";
 import history from "./commands/history.js";
+import grind from "./commands/grind.js";
+import upgrade from "./commands/upgrade.js";
 
-for (const command of [help, drink, type_command, set, clear, save, hard_reset, history]) {
+for (const command of [help, drink, type_command, set, clear, save, hard_reset, history, grind, upgrade]) {
     for (const alias of command.aliases) {
         commandsStore.set(alias, command);
     }
 }
 
 function handleTerminalInput(input) {
+    if (input.trim().length === 0) {
+        return;
+    }
     if (config.history.max_entries > 0) {
         // if the last history entry is the same as the current input, don't add it again.
         if (player.history.length === 0 || player.history[player.history.length - 1] !== input) {

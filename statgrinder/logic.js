@@ -1,8 +1,10 @@
-export function displayTrimString(string, length) {
-    if (string.length <= length) return string;
-    return string.slice(0, length - 3) + "...";
+export function displayTrimString(str = "", length = 0) {
+    const s = String(str);
+    if (length <= 0) return "";
+    if (s.length <= length) return s;
+    if (length <= 3) return s.slice(0, length);
+    return s.slice(0, length - 3) + "...";
 }
-
 export function levenshtein(a, b) {
     if (a === b) return 0;
     if (!a.length) return b.length;
@@ -31,7 +33,7 @@ export function levenshtein(a, b) {
 }
 
 export function escapeHtml(str = "") {
-    return str.replace(/[&<>"']/g, function (match) {
+    return String(str).replace(/[&<>"']/g, function (match) {
         switch (match) {
             case "&":
                 return "&amp;";
@@ -54,15 +56,16 @@ export function countReadableCharactersInHtmlString(html = "") {
 }
 
 export function randomIntBetween(min, max) {
+    if (min > max) [min, max] = [max, min];
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 export function randomFloatBetween(min, max) {
+    if (min > max) [min, max] = [max, min];
     return Math.random() * (max - min) + min;
 }
 
 export function randomSelect(array) {
-    if (array.length === 0) return null;
-    const index = Math.floor(Math.random() * array.length);
-    return array[index];
+    if (!Array.isArray(array) || array.length === 0) return null;
+    return array[Math.floor(Math.random() * array.length)];
 }

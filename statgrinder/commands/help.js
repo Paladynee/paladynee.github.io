@@ -11,9 +11,9 @@ export default {
         const [_stem, subcommand] = commandString.split(/ +/g);
 
         if (!subcommand) {
-            return showAllCommands();
+            showAllCommands();
         } else {
-            return specificCommand(subcommand.toLowerCase());
+            specificCommand(subcommand.toLowerCase());
         }
     },
 };

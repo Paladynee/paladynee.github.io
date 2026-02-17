@@ -95,8 +95,7 @@ impl GameState {
 
         let palette_hue = rand.gen_range(0.0..360.0);
         let palette = generate_hsv_lum_palette(object_amount, palette_hue, 1.0);
-        let anti_palette =
-            generate_hsv_lum_palette(object_amount, (palette_hue + 180.0) % 360.0, 1.0);
+        let anti_palette = generate_hsv_lum_palette(object_amount, (palette_hue + 180.0) % 360.0, 1.0);
 
         let held_keys = AHashSet::new();
 
@@ -182,8 +181,7 @@ impl GameState {
             tmp1.scale(1000.0);
             obj.acceleration.set_vec(&tmp1);
 
-            obj.velocity
-                .add(obj.acceleration.x * dt, obj.acceleration.y * dt);
+            obj.velocity.add(obj.acceleration.x * dt, obj.acceleration.y * dt);
 
             obj.velocity.scale(obj.friction.powf(dt));
 
@@ -471,8 +469,7 @@ impl GameState {
     fn reset_colors(&mut self) {
         let new_palette_hue = self.rand.gen_range(0.0..360.0);
         let new_palette = generate_hsv_lum_palette(self.object_amount, new_palette_hue, 1.0);
-        let new_anti_palette =
-            generate_hsv_lum_palette(self.object_amount, (new_palette_hue + 180.0) % 360.0, 1.0);
+        let new_anti_palette = generate_hsv_lum_palette(self.object_amount, (new_palette_hue + 180.0) % 360.0, 1.0);
 
         self.palette = new_palette;
         self.anti_palette = new_anti_palette;
@@ -530,8 +527,7 @@ impl GameState {
 
     pub fn render(&mut self, f64a: Float64Array) {
         for (i, (obj, color)) in self.objects.iter().zip(self.palette.iter()).enumerate() {
-            let [x, y, size_x, size_y] =
-                square_at(obj.position.x, obj.position.y, obj.size.x, obj.size.y);
+            let [x, y, size_x, size_y] = square_at(obj.position.x, obj.position.y, obj.size.x, obj.size.y);
             let mut trail_vec = obj.velocity.clone();
             trail_vec.normalize();
             let mag = obj.velocity.mag();

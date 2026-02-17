@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# Set the mode based on the first argument
+if [ "$1" == "release" ]; then
+    MODE="release"
+    CARGO_FLAGS="--release"
+else
+    MODE="debug"
+    CARGO_FLAGS=""
+fi
+
+echo "Running cargo build $CARGO_FLAGS..."
+cargo build $CARGO_FLAGS
+
+# Check if build was successful
+if [ $? -eq 0 ]; then
+    SRC="target/wasm32-unknown-unknown/$MODE/hashnet_wasmgl.wasm"
+    DEST="pub/hashnet_wasmgl.wasm"
+    
+    echo "Copying $SRC to $DEST..."
+    cp "$SRC" "$DEST"
+    echo "Build and copy successful."
+else
+    exit 1
+fi

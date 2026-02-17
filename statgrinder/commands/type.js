@@ -3,7 +3,7 @@ import { randomIntBetween, randomSelect } from "../logic.js";
 import { writeToStdout } from "../stdout.js";
 
 export default {
-    aliases: ["type", "code", "hack"],
+    aliases: ["type", "code", "hack", "text"],
     usages: ["type"],
     description: "Type some text.",
     exec(_commandString = "") {

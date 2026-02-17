@@ -1,0 +1,13 @@
+#!/bin/bash
+# Start miniserve with COOP and COEP headers for SharedArrayBuffer support in background
+nohup miniserve \
+    --header "Cross-Origin-Opener-Policy:same-origin" \
+    --header "Cross-Origin-Embedder-Policy:require-corp" \
+    --header "Cache-Control:no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0" \
+    --header "Pragma:no-cache" \
+    --header "Expires:0" \
+    --index index.html \
+    pub/ > /dev/null 2>&1 &
+
+echo "miniserve is running in the background. Access it at http://localhost:8080 (default)"
+

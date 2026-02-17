@@ -9,12 +9,12 @@ export default {
     exec(commandString = "") {
         const [_stem, subcommand, ...args] = commandString.split(/ +/g);
         if (!subcommand) {
-            return listAllConfigs();
+            listAllConfigs();
         } else if (args.length === 0) {
-            return getConfig(subcommand);
+            getConfig(subcommand);
         } else {
             // original command written to the terminal because we don't want to modify the value portion
-            return setConfig(commandString);
+            setConfig(commandString);
         }
     },
 };

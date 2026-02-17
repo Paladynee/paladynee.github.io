@@ -4,7 +4,7 @@ const can = document.querySelector("canvas");
 const ctx = can.getContext("2d");
 resize(can);
 
-let state = GameState.new(1000, can.width, can.height, rsVector2.new(can.width / 2, can.height / 2), 18, 3, performance.now());
+let state = GameState.new(3000, can.width, can.height, rsVector2.new(can.width / 2, can.height / 2), 18, 3, performance.now());
 state.neo_physics_handler = true;
 globalThis.state = state;
 

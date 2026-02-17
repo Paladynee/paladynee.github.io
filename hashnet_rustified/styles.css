@@ -7,7 +7,7 @@ body {
 
 canvas {
     position: fixed;
-    background-color: #191724;
+    background-color: rgb(25, 23, 36);
 }
 
 .info {

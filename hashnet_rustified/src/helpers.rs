@@ -23,7 +23,7 @@ pub fn generate_hsv_lum_palette(size: usize, hue: f64, saturation: f64) -> Vec<H
 
     (0..size)
         .map(|i| {
-            let luminosity = 1.0 - (i as f64) * step_size;
+            let luminosity = (i as f64).mul_add(-step_size, 1.0);
             Hsv {
                 h: hue,
                 s: saturation,
@@ -39,8 +39,17 @@ pub fn generate_hsv_lum_palette(size: usize, hue: f64, saturation: f64) -> Vec<H
 impl Hsv {
     pub fn rot_hue(&self, degrees: f64) -> Hsv {
         let mut new_hue = (self.h + degrees) % 360.0;
-        while new_hue < 0.0 {
-            new_hue += 360.0;
+        if !(0.0..360.0).contains(&new_hue) {
+            #[cold]
+            #[inline(always)]
+            fn _cold() {}
+            _cold();
+            let next = new_hue % 360.0;
+            if next < 0.0 {
+                new_hue = 360.0 + next;
+            } else {
+                new_hue = next;
+            }
         }
         Hsv {
             h: new_hue,
@@ -62,30 +71,67 @@ impl Hsv {
         let g;
         let b;
 
-        if (0.0..60.0).contains(&h) {
-            r = c;
-            g = x;
-            b = 0.0;
-        } else if (60.0..120.0).contains(&h) {
-            r = x;
-            g = c;
-            b = 0.0;
-        } else if (120.0..180.0).contains(&h) {
-            r = 0.0;
-            g = c;
-            b = x;
-        } else if (180.0..240.0).contains(&h) {
-            r = 0.0;
-            g = x;
-            b = c;
-        } else if (240.0..300.0).contains(&h) {
-            r = x;
-            g = 0.0;
-            b = c;
-        } else {
-            r = c;
-            g = 0.0;
-            b = x;
+        // if (0.0..60.0).contains(&h) {
+        //     r = c;
+        //     g = x;
+        //     b = 0.0;
+        // } else if (60.0..120.0).contains(&h) {
+        //     r = x;
+        //     g = c;
+        //     b = 0.0;
+        // } else if (120.0..180.0).contains(&h) {
+        //     r = 0.0;
+        //     g = c;
+        //     b = x;
+        // } else if (180.0..240.0).contains(&h) {
+        //     r = 0.0;
+        //     g = x;
+        //     b = c;
+        // } else if (240.0..300.0).contains(&h) {
+        //     r = x;
+        //     g = 0.0;
+        //     b = c;
+        // } else {
+        //     r = c;
+        //     g = 0.0;
+        //     b = x;
+        // }
+        match h {
+            0.0..60.0 => {
+                r = c;
+                g = x;
+                b = 0.0;
+            }
+            60.0..120.0 => {
+                r = x;
+                g = c;
+                b = 0.0;
+            }
+            120.0..180.0 => {
+                r = 0.0;
+                g = c;
+                b = x;
+            }
+            180.0..240.0 => {
+                r = 0.0;
+                g = x;
+                b = c;
+            }
+            240.0..300.0 => {
+                r = x;
+                g = 0.0;
+                b = c;
+            }
+            300.0..360.0 | 360.0 => {
+                r = c;
+                g = 0.0;
+                b = x;
+            }
+            _ => {
+                r = c;
+                g = 0.0;
+                b = x;
+            }
         }
 
         Rgb {

@@ -4,4 +4,5 @@ export default {
     letters_typed: 0,
     history: [],
     history_index: -1,
+    last_grind: Date.now(),
 };

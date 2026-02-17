@@ -1,0 +1,25 @@
+[build]
+target = "wasm32-unknown-unknown"
+
+[unstable]
+build-std = ["core", "compiler_builtins", "alloc", "panic_abort"]
+
+[target.wasm32-unknown-unknown]
+rustflags = [
+    # "-Ctarget-feature=+bulk-memory,+mutable-globals,+nontrapping-fptoint,+sign-ext,+simd128",
+    "-Ctarget-feature=+atomics",
+    "-Ctarget-feature=+bulk-memory",
+    "-Ctarget-feature=+mutable-globals",
+    "-Ctarget-feature=+nontrapping-fptoint",
+    "-Ctarget-feature=+sign-ext",
+    "-Ctarget-feature=+simd128",
+    "-Ctarget-feature=+tail-call",
+    "-Ctarget-feature=+extended-const",
+    "-Ctarget-feature=+multivalue",
+    "-Csymbol-mangling-version=legacy",
+    "-Clink-arg=--import-memory",
+    "-Clink-arg=--shared-memory",
+    "-Clink-arg=--initial-memory=268435456",
+    "-Clink-arg=--max-memory=2147483648",
+    "-Zunstable-options",
+]

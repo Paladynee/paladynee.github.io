@@ -178,8 +178,8 @@ impl rsVector2 {
         let cos = angle.cos();
         let sin = angle.sin();
 
-        let new_x = self.x * cos - self.y * sin;
-        let new_y = self.x * sin + self.y * cos;
+        let new_x = self.x.mul_add(cos, -(self.y * sin));
+        let new_y = self.x.mul_add(sin, self.y * cos);
 
         self.x = new_x;
         self.y = new_y;
